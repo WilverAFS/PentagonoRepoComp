@@ -1,5 +1,6 @@
 package com.ingsoftware.pentagono.view
 
+import android.text.style.AlignmentSpan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -57,10 +58,45 @@ fun MenuScreen(
             }
 
             Spacer(Modifier.height(8.dp))
-            // Botón de salir en rojo
-            MenuButton("Salir", Icons.Filled.ExitToApp, Color.Red, colorScheme.onPrimary) {
-                onNavigate("salir")
+
+            // 🔹 Nueva fila con Inicio y Salir juntos
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = { onNavigate("salir") },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Salir", color = colorScheme.onBackground)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Filled.ExitToApp, contentDescription = "Salir", tint = colorScheme.onBackground)
+                    }
+                }
+
+                Button(
+                    onClick = { onNavigate("start") },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Inicio", color = colorScheme.background)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Filled.Home, contentDescription = "Inicio", tint = colorScheme.background)
+                    }
+                }
             }
+
         }
     }
 }

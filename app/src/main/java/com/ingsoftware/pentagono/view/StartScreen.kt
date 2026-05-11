@@ -21,7 +21,10 @@ import com.ingsoftware.pentagono.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartScreen(onMenuClick: () -> Unit = {}) {
+fun StartScreen(
+    onMenuClick: () -> Unit = {},
+    onExit: () -> Unit = {} //Nuevo parametro para salir
+) {
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -121,14 +124,17 @@ fun StartScreen(onMenuClick: () -> Unit = {}) {
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                Button(
+                    onClick = {onExit() }, //llamada a onExit
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Salir", color = colorScheme.onPrimary)
+                }
                 Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
                     Text("Cotizaciones", color = colorScheme.onSecondary)
                 }
                 Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
                     Text("Órdenes", color = colorScheme.onSecondary)
-                }
-                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
-                    Text("Salir", color = colorScheme.onPrimary)
                 }
             }
         }

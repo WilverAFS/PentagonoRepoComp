@@ -2,26 +2,29 @@ package com.ingsoftware.pentagono.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PriceChange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ingsoftware.pentagono.model.Cotizacion
+import com.ingsoftware.pentagono.model.EstadoCotizacion
+import com.ingsoftware.pentagono.model.EstadoPago
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CotizacionScreen(
+    cotizaciones: List<Cotizacion> = emptyList(),
     onBack: () -> Unit = {},
-    onSave: () -> Unit = {}
+    onAddCotizacion: () -> Unit = {},
+    onSearchCotizacion: () -> Unit = {},
+    onEditCotizacion: (Cotizacion) -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -29,7 +32,13 @@ fun CotizacionScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Cotizaciones",
-                onMenuClick = { onBack() } // vuelve a la vista anterior
+                onMenuClick = { onBack() }
+            )
+        },
+        bottomBar = {
+            PentagonoBottomBar(
+                onSearchClick = { onSearchCotizacion() },
+                onAddClick = { onAddCotizacion() }
             )
         }
     ) { innerPadding ->
@@ -37,49 +46,47 @@ fun CotizacionScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Color.Black)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .background(colorScheme.background)
+                .padding(16.dp)
         ) {
-            Text("Nueva Cotización", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
-
-            // Campos de formulario
-            var cliente by remember { mutableStateOf(TextFieldValue("")) }
-            var descripcion by remember { mutableStateOf(TextFieldValue("")) }
-            var precio by remember { mutableStateOf(TextFieldValue("")) }
-
-            OutlinedTextField(
-                value = cliente,
-                onValueChange = { cliente = it },
-                label = { Text("Cliente") },
-                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = "Cliente") },
-                modifier = Modifier.fillMaxWidth()
+            Text(
+                "Listado de Cotizaciones",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colorScheme.primary
             )
 
-            OutlinedTextField(
-                value = descripcion,
-                onValueChange = { descripcion = it },
-                label = { Text("Descripción del trabajo") },
-                leadingIcon = { Icon(Icons.Filled.Description, contentDescription = "Descripción") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Spacer(Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = precio,
-                onValueChange = { precio = it },
-                label = { Text("Precio estimado") },
-                leadingIcon = { Icon(Icons.Filled.PriceChange, contentDescription = "Precio") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            Button(
-                onClick = { onSave() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Guardar Cotización", color = colorScheme.onSecondary)
+                items(cotizaciones) { cotizacion ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("ID: ${cotizacion.id_cotizacion}", style = MaterialTheme.typography.bodySmall)
+                                Text("Cliente: ${cotizacion.id_cliente}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Fecha: ${cotizacion.fecha}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Descripción: ${cotizacion.descripcion}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Monto: $${cotizacion.monto}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Estado: ${cotizacion.estado}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Pago: ${cotizacion.pago}", style = MaterialTheme.typography.bodyMedium)
+                            }
+                            IconButton(onClick = { onEditCotizacion(cotizacion) }) {
+                                Icon(Icons.Filled.Edit, contentDescription = "Editar Cotización")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -88,15 +95,23 @@ fun CotizacionScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CotizacionScreenPreviewLight() {
+    val cotizacionesDemo = listOf(
+        Cotizacion(1, 101, "2026-05-17", "Instalación de vidrio templado", 2500.0, EstadoCotizacion.PENDIENTE, EstadoPago.ANTICIPO),
+        Cotizacion(2, 102, "2026-05-10", "Puerta corrediza", 1800.0, EstadoCotizacion.ACEPTADO, EstadoPago.COMPLETO)
+    )
     MaterialTheme(colorScheme = lightColorScheme()) {
-        CotizacionScreen()
+        CotizacionScreen(cotizaciones = cotizacionesDemo)
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun CotizacionScreenPreviewDark() {
+    val cotizacionesDemo = listOf(
+        Cotizacion(1, 101, "2026-05-17", "Instalación de vidrio templado", 2500.0, EstadoCotizacion.PENDIENTE, EstadoPago.ANTICIPO),
+        Cotizacion(2, 102, "2026-05-10", "Puerta corrediza", 1800.0, EstadoCotizacion.ACEPTADO, EstadoPago.COMPLETO)
+    )
     MaterialTheme(colorScheme = darkColorScheme()) {
-        CotizacionScreen()
+        CotizacionScreen(cotizaciones = cotizacionesDemo)
     }
 }

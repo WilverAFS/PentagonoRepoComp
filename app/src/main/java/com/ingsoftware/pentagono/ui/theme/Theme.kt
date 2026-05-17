@@ -42,7 +42,7 @@ val AppTypography = Typography(
 
 // Colores principales
 val VerdePrincipal = Color(0xFF3FE048)
-val GrisPrincipal = Color(0xFF616161)
+val GrisPrincipal = Color(0xFF5E5E5E)
 val NaranjaPrincipal = Color(0xFF304FFE)
 
 // Colores secundarios

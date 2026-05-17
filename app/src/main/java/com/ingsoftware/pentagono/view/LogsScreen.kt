@@ -4,32 +4,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ingsoftware.pentagono.model.Log
+import com.ingsoftware.pentagono.model.TipoLog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogsScreen(
+    logs: List<Log> = emptyList(),
     onBack: () -> Unit = {},
-    onClearLogs: () -> Unit = {}
+    onSearchLog: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
-
-    // Ejemplo de registros simulados
-    val logs = listOf(
-        "Usuario admin inició sesión",
-        "Se creó una cotización para Cliente A",
-        "Orden de trabajo #123 marcada como completada",
-        "Empleado Juan Pérez agregado",
-        "Error: conexión fallida al servidor"
-    )
 
     Scaffold(
         topBar = {
@@ -37,51 +29,51 @@ fun LogsScreen(
                 title = "Logs del Sistema",
                 onMenuClick = { onBack() }
             )
+        },
+        bottomBar = {
+            PentagonoBottomBar(
+                onSearchClick = { onSearchLog() },
+                onAddClick = { } // no se usa aquí
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colorScheme.background)
                 .padding(16.dp)
         ) {
-            Text("Historial de eventos", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
+            Text(
+                "Historial de Logs",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colorScheme.primary
+            )
 
             Spacer(Modifier.height(16.dp))
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(logs) { log ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.secondary)
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
-                                .padding(12.dp)
+                                .padding(16.dp)
                                 .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(log, color = colorScheme.onSecondary)
-                            Icon(Icons.Filled.List, contentDescription = "Log", tint = colorScheme.onSecondary)
+                            Text("ID: ${log.id_log}", style = MaterialTheme.typography.bodySmall)
+                            Text("Dueño: ${log.id_dueño}", style = MaterialTheme.typography.bodyMedium)
+                            Text("Tipo: ${log.tipo}", style = MaterialTheme.typography.bodyMedium)
+                            Text("Descripción: ${log.descripcion}", style = MaterialTheme.typography.bodyMedium)
+                            Text("Fecha: ${log.fecha}", style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                 }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = { onClearLogs() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-            ) {
-                Icon(Icons.Filled.Delete, contentDescription = "Borrar", tint = colorScheme.onPrimary)
-                Spacer(Modifier.width(8.dp))
-                Text("Borrar Logs", color = colorScheme.onPrimary)
             }
         }
     }
@@ -90,15 +82,25 @@ fun LogsScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LogsScreenPreviewLight() {
+    val logsDemo = listOf(
+        Log(1, 301, TipoLog.ADD, "Se agregó un nuevo cliente", "2026-05-17"),
+        Log(2, 301, TipoLog.UPDATE, "Se actualizó una cotización", "2026-05-16"),
+        Log(3, 301, TipoLog.ACCESS, "Dueño accedió al sistema", "2026-05-15")
+    )
     MaterialTheme(colorScheme = lightColorScheme()) {
-        LogsScreen()
+        LogsScreen(logs = logsDemo)
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LogsScreenPreviewDark() {
+    val logsDemo = listOf(
+        Log(1, 301, TipoLog.ADD, "Se agregó un nuevo cliente", "2026-05-17"),
+        Log(2, 301, TipoLog.UPDATE, "Se actualizó una cotización", "2026-05-16"),
+        Log(3, 301, TipoLog.ACCESS, "Dueño accedió al sistema", "2026-05-15")
+    )
     MaterialTheme(colorScheme = darkColorScheme()) {
-        LogsScreen()
+        LogsScreen(logs = logsDemo)
     }
 }

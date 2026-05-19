@@ -7,3 +7,4 @@ data class Cliente(
     val correo: String,
     val direccion: String
 )
+//CAMBIAR PK POR TELEFONO e implementar validacion

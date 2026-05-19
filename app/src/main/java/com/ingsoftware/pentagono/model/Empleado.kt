@@ -8,3 +8,4 @@ data class Empleado(
     val puesto: String,
     val direccion: String
 )
+//QUITAR PUESTO, CAMBIAR CORREO POR CURP(pk)

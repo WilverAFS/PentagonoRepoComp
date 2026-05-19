@@ -70,7 +70,7 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Blanco,
     onSecondary = Negro,
     onBackground = Negro,
-    onSurface = Blanco
+    onSurface = Negro
 )
 
 @Composable

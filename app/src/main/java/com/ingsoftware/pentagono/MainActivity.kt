@@ -114,12 +114,49 @@ class MainActivity : ComponentActivity() {
                             viewModel = empleadoViewModel,
                             onBack = { navController.popBackStack() },
                             onAddEmpleado = { navController.navigate("nuevoEmpleado") },
-                            onSearchEmpleado = { /* lógica de búsqueda */ },
+                            onSearchEmpleado = { navController.navigate("buscarEmpleado") },
                             onEditEmpleado = { empleado ->
                                 navController.navigate("editarEmpleado/${empleado.id_empleado}")
                             }
                         )
                     }
+
+                    composable("nuevoEmpleado") {
+                        NuevoEmpleadoScreen(
+                            viewModel = empleadoViewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable("buscarEmpleado") {
+                        BuscarEmpleadoScreen(
+                            viewModel = empleadoViewModel,
+                            onBack = { navController.popBackStack() },
+                            onEditEmpleado = { empleado ->
+                                navController.navigate("editarEmpleado/${empleado.id_empleado}")
+                            }
+                        )
+                    }
+
+                    composable("editarEmpleado/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        val empleados by empleadoViewModel.empleados.collectAsState()
+                        val empleado = empleados.find { it.id_empleado == id }
+
+                        if (empleado != null) {
+                            EditarEmpleadoScreen(
+                                viewModel = empleadoViewModel,
+                                empleado = empleado,
+                                onBack = { navController.popBackStack() }
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+
+
 
                     // ✅ Cotizaciones
                     composable("cotizaciones") {

@@ -5,7 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,9 +17,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.ingsoftware.pentagono.data.*
 import com.ingsoftware.pentagono.viewmodel.*
-import com.ingsoftware.pentagono.model.*
-import com.ingsoftware.pentagono.ui.theme.PentagonoTheme
 import com.ingsoftware.pentagono.view.*
+import com.ingsoftware.pentagono.ui.theme.PentagonoTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("ViewModelConstructorInComposable")
@@ -25,6 +30,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             PentagonoTheme {
                 val navController = rememberNavController()
+                val context = LocalContext.current
+                val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
+
+                // ✅ Instanciamos los ViewModels una sola vez y los compartimos
+                val clienteViewModel = ClienteViewModel(ClienteRepository(db.clienteDao()))
+                val empleadoViewModel = EmpleadoViewModel(EmpleadoRepository(db.empleadoDao()))
+                val cotizacionViewModel = CotizacionViewModel(CotizacionRepository(db.cotizacionDao()))
+                val ordenViewModel = OrdenViewModel(OrdenRepository(db.ordenDao()))
+                val logViewModel = LogViewModel(LogRepository(db.logDao()))
+                val dueñoViewModel = DueñoViewModel(DueñoRepository(db.dueñoDao()))
 
                 NavHost(
                     navController = navController,
@@ -46,36 +61,57 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    //Integración con Room y ViewModel para Clientes
+                    // ✅ Clientes
                     composable("clientes") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(
-                            context,
-                            AppDatabase::class.java,
-                            "pentagono_db"
-                        ).build()
-                        val repository = ClienteRepository(db.clienteDao())
-                        val viewModel = ClienteViewModel(repository)
-
                         ClientesScreen(
-                            viewModel = viewModel,
+                            viewModel = clienteViewModel,
                             onBack = { navController.popBackStack() },
                             onAddCliente = { navController.navigate("nuevoCliente") },
-                            onSearchCliente = { /* lógica para buscar cliente */ },
+                            onSearchCliente = { navController.navigate("buscarCliente") },
                             onEditCliente = { cliente ->
                                 navController.navigate("editarCliente/${cliente.id_cliente}")
                             }
                         )
                     }
 
-                    composable("empleados") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
-                        val repository = EmpleadoRepository(db.empleadoDao())
-                        val viewModel = EmpleadoViewModel(repository)
+                    composable("buscarCliente") {
+                        BuscarClienteScreen(
+                            viewModel = clienteViewModel,
+                            onBack = { navController.popBackStack() },
+                            onEditCliente = { cliente ->
+                                navController.navigate("editarCliente/${cliente.id_cliente}")
+                            }
+                        )
+                    }
 
+                    composable("nuevoCliente") {
+                        NuevoClienteScreen(
+                            viewModel = clienteViewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("editarCliente/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        val clientes by clienteViewModel.clientes.collectAsState()
+                        val cliente = clientes.find { it.id_cliente == id }
+
+                        if (cliente != null) {
+                            EditarClienteScreen(
+                                viewModel = clienteViewModel,
+                                cliente = cliente,
+                                onBack = { navController.popBackStack() }
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+
+                    // ✅ Empleados
+                    composable("empleados") {
                         EmpleadosScreen(
-                            viewModel = viewModel,
+                            viewModel = empleadoViewModel,
                             onBack = { navController.popBackStack() },
                             onAddEmpleado = { navController.navigate("nuevoEmpleado") },
                             onSearchEmpleado = { /* lógica de búsqueda */ },
@@ -85,15 +121,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
+                    // ✅ Cotizaciones
                     composable("cotizaciones") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
-                        val repository = CotizacionRepository(db.cotizacionDao())
-                        val viewModel = CotizacionViewModel(repository)
-
                         CotizacionScreen(
-                            viewModel = viewModel,
+                            viewModel = cotizacionViewModel,
                             onBack = { navController.popBackStack() },
                             onAddCotizacion = { navController.navigate("nuevaCotizacion") },
                             onSearchCotizacion = { /* lógica de búsqueda */ },
@@ -103,15 +134,10 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
+                    // ✅ Órdenes
                     composable("ordenes") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
-                        val repository = OrdenRepository(db.ordenDao())
-                        val viewModel = OrdenViewModel(repository)
-
                         OrdenesScreen(
-                            viewModel = viewModel,
+                            viewModel = ordenViewModel,
                             onBack = { navController.popBackStack() },
                             onAddOrden = { navController.navigate("nuevaOrden") },
                             onSearchOrden = { /* lógica de búsqueda */ },
@@ -121,32 +147,20 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-
+                    // ✅ Logs
                     composable("logs") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
-                        val repository = LogRepository(db.logDao())
-                        val viewModel = LogViewModel(repository)
-
                         LogsScreen(
-                            viewModel = viewModel,
+                            viewModel = logViewModel,
                             onBack = { navController.popBackStack() },
                             onSearchLog = { /* lógica de búsqueda de logs */ }
                         )
                     }
 
-
+                    // ✅ Configuración (Dueños)
                     composable("configuracion") {
-                        val context = LocalContext.current
-                        val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
-                        val repository = DueñoRepository(db.dueñoDao())
-                        val viewModel = DueñoViewModel(repository)
-
-                        // El dueño actual se obtiene del login, aquí lo ponemos fijo como ejemplo
                         val dueñoActual = DueñoEntity(1, "Administrador", "admin123")
-
                         ConfiguracionScreen(
-                            viewModel = viewModel,
+                            viewModel = dueñoViewModel,
                             dueñoActual = dueñoActual,
                             onBack = { navController.popBackStack() },
                             onAddDueño = { navController.navigate("nuevoDueño") },
@@ -156,7 +170,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                 }
             }
         }

@@ -7,39 +7,32 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.ClienteEntity
 import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClientesScreen(
+fun BuscarClienteScreen(
     viewModel: ClienteViewModel,
     onBack: () -> Unit = {},
-    onAddCliente: () -> Unit = {},
-    onSearchCliente: () -> Unit = {},
     onEditCliente: (ClienteEntity) -> Unit = {}
 ) {
-    val clientes by viewModel.clientes.collectAsState() // Observamos el flujo de datos
+    val clientes by viewModel.clientes.collectAsState()
+    var query by remember { mutableStateOf("") }
+    var resultados by remember { mutableStateOf(listOf<ClienteEntity>()) }
 
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
         topBar = {
             PentagonoTopBar(
-                title = "Clientes",
+                title = "Buscar Cliente",
                 onMenuClick = { onBack() }
-            )
-        },
-        bottomBar = {
-            PentagonoBottomBar(
-                onSearchClick = { onSearchCliente() },
-                onAddClick = { onAddCliente() }
             )
         }
     ) { innerPadding ->
@@ -48,20 +41,44 @@ fun ClientesScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(colorScheme.background)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                "Clientes totales",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.primary
+            OutlinedTextField(
+                value = query,
+                onValueChange = {
+                    query = it
+                    resultados = if (query.isBlank()) {
+                        emptyList()
+                    } else {
+                        when {
+                            query.matches(Regex("^[0-9]+$")) -> {
+                                // Si es número, buscar por ID exacto o teléfono exacto
+                                clientes.filter {
+                                    it.id_cliente.toString() == query || it.telefono == query
+                                }
+                            }
+                            else -> {
+                                // Si es texto, buscar coincidencias en nombre
+                                clientes.filter {
+                                    it.nombre.contains(query, ignoreCase = true)
+                                }
+                            }
+                        }
+                    }
+                },
+                label = { Text("Buscar por ID, Nombre o Teléfono") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(clientes) { cliente ->
+            if (resultados.isEmpty() && query.isNotBlank()) {
+                Text("No se encontraron resultados", color = Color.Red)
+            }
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(resultados) { cliente ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
@@ -90,4 +107,3 @@ fun ClientesScreen(
         }
     }
 }
-

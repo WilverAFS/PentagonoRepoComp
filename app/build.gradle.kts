@@ -54,6 +54,7 @@ dependencies {
 
     //Glide
     implementation("com.github.bumptech.glide:glide:5.0.5")
+    implementation(libs.androidx.ui.graphics)
 
     //Room
     val room_version = "2.8.4"

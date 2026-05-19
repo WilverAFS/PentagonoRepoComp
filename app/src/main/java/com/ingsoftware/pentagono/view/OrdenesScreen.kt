@@ -15,25 +15,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.model.Orden
 import com.ingsoftware.pentagono.model.EstadoOrden
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.ingsoftware.pentagono.data.OrdenEntity
+import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdenesScreen(
-    ordenes: List<Orden> = emptyList(),
+    viewModel: OrdenViewModel,
     onBack: () -> Unit = {},
     onAddOrden: () -> Unit = {},
     onSearchOrden: () -> Unit = {},
-    onEditOrden: (Orden) -> Unit = {}
+    onEditOrden: (OrdenEntity) -> Unit = {}
 ) {
+    val ordenes by viewModel.ordenes.collectAsState()
+
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = {
-            PentagonoTopBar(
-                title = "Órdenes de Trabajo",
-                onMenuClick = { onBack() }
-            )
-        },
+        topBar = { PentagonoTopBar(title = "Órdenes de Trabajo", onMenuClick = { onBack() }) },
         bottomBar = {
             PentagonoBottomBar(
                 onSearchClick = { onSearchOrden() },
@@ -48,38 +49,33 @@ fun OrdenesScreen(
                 .background(colorScheme.background)
                 .padding(16.dp)
         ) {
-            Text(
-                "Listado de Órdenes",
+            Text("Listado de Órdenes",
                 style = MaterialTheme.typography.headlineMedium,
                 color = colorScheme.primary
             )
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(ordenes) { orden ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
                     ) {
                         Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("ID: ${orden.id_orden}", style = MaterialTheme.typography.bodySmall)
-                                Text("Cotización: ${orden.id_cotizacion}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Empleado: ${orden.id_empleado}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dueño: ${orden.id_dueño}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Inicio: ${orden.fecha_inicio}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Fin: ${orden.fecha_fin ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Estado: ${orden.estado}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Entrega: ${orden.fecha_entrega ?: "N/A"}", style = MaterialTheme.typography.bodyMedium)
+                                Text("ID: ${orden.id_orden}")
+                                Text("Cotización: ${orden.id_cotizacion}")
+                                Text("Empleado: ${orden.id_empleado}")
+                                Text("Dueño: ${orden.id_dueño}")
+                                Text("Inicio: ${orden.fecha_inicio}")
+                                Text("Fin: ${orden.fecha_fin ?: "N/A"}")
+                                Text("Estado: ${orden.estado}")
+                                Text("Entrega: ${orden.fecha_entrega ?: "N/A"}")
                             }
                             IconButton(onClick = { onEditOrden(orden) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Orden")
@@ -89,29 +85,5 @@ fun OrdenesScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun OrdenesScreenPreviewLight() {
-    val ordenesDemo = listOf(
-        Orden(1, 101, 201, 301, "2026-05-01", "2026-05-10", EstadoOrden.PENDIENTE, null),
-        Orden(2, 102, 202, 301, "2026-04-15", "2026-04-20", EstadoOrden.TERMINADO, "2026-04-21")
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        OrdenesScreen(ordenes = ordenesDemo)
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun OrdenesScreenPreviewDark() {
-    val ordenesDemo = listOf(
-        Orden(1, 101, 201, 301, "2026-05-01", "2026-05-10", EstadoOrden.PENDIENTE, null),
-        Orden(2, 102, 202, 301, "2026-04-15", "2026-04-20", EstadoOrden.TERMINADO, "2026-04-21")
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        OrdenesScreen(ordenes = ordenesDemo)
     }
 }

@@ -13,94 +13,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.model.Log
 import com.ingsoftware.pentagono.model.TipoLog
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.ingsoftware.pentagono.data.LogEntity
+import com.ingsoftware.pentagono.viewmodel.LogViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LogsScreen(
-    logs: List<Log> = emptyList(),
+    viewModel: LogViewModel,
     onBack: () -> Unit = {},
     onSearchLog: () -> Unit = {}
 ) {
+    val logs by viewModel.logs.collectAsState()
+
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = {
-            PentagonoTopBar(
-                title = "Logs del Sistema",
-                onMenuClick = { onBack() }
-            )
-        },
-        bottomBar = {
-            PentagonoBottomBar(
-                onSearchClick = { onSearchLog() },
-                onAddClick = { } // no se usa aquí
-            )
-        }
+        topBar = { PentagonoTopBar(title = "Logs del Sistema", onMenuClick = { onBack() }) },
+        bottomBar = { PentagonoBottomBar(onSearchClick = { onSearchLog() }, onAddClick = { }) } // sin botón de añadir
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(colorScheme.background)
-                .padding(16.dp)
+            modifier = Modifier.padding(innerPadding).fillMaxSize().background(colorScheme.background).padding(16.dp)
         ) {
-            Text(
-                "Historial de Logs",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.primary
-            )
+            Text("Historial de Logs", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(logs) { log ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
-                    ) {
+                    Card(modifier = Modifier.fillMaxWidth()) {
                         Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text("ID: ${log.id_log}", style = MaterialTheme.typography.bodySmall)
-                            Text("Dueño: ${log.id_dueño}", style = MaterialTheme.typography.bodyMedium)
-                            Text("Tipo: ${log.tipo}", style = MaterialTheme.typography.bodyMedium)
-                            Text("Descripción: ${log.descripcion}", style = MaterialTheme.typography.bodyMedium)
-                            Text("Fecha: ${log.fecha}", style = MaterialTheme.typography.bodyMedium)
+                            Text("ID: ${log.id_log}")
+                            Text("Dueño: ${log.id_dueño}")
+                            Text("Tipo: ${log.tipo}")
+                            Text("Descripción: ${log.descripcion}")
+                            Text("Fecha: ${log.fecha}")
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LogsScreenPreviewLight() {
-    val logsDemo = listOf(
-        Log(1, 301, TipoLog.ADD, "Se agregó un nuevo cliente", "2026-05-17"),
-        Log(2, 301, TipoLog.UPDATE, "Se actualizó una cotización", "2026-05-16"),
-        Log(3, 301, TipoLog.ACCESS, "Dueño accedió al sistema", "2026-05-15")
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        LogsScreen(logs = logsDemo)
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LogsScreenPreviewDark() {
-    val logsDemo = listOf(
-        Log(1, 301, TipoLog.ADD, "Se agregó un nuevo cliente", "2026-05-17"),
-        Log(2, 301, TipoLog.UPDATE, "Se actualizó una cotización", "2026-05-16"),
-        Log(3, 301, TipoLog.ACCESS, "Dueño accedió al sistema", "2026-05-15")
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        LogsScreen(logs = logsDemo)
     }
 }

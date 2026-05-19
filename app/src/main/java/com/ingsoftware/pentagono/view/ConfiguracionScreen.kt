@@ -14,26 +14,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.model.Dueño
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.ingsoftware.pentagono.data.DueñoEntity
+import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfiguracionScreen(
-    dueñoActual: Dueño,
-    dueños: List<Dueño> = emptyList(),
+    viewModel: DueñoViewModel,
+    dueñoActual: DueñoEntity,
     onBack: () -> Unit = {},
     onAddDueño: () -> Unit = {},
     onSearchDueño: () -> Unit = {},
-    onEditDueño: (Dueño) -> Unit = {}
+    onEditDueño: (DueñoEntity) -> Unit = {}
 ) {
+    val dueños by viewModel.dueños.collectAsState()
+
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = {
-            PentagonoTopBar(
-                title = "Configuración",
-                onMenuClick = { onBack() }
-            )
-        },
+        topBar = { PentagonoTopBar(title = "Configuración", onMenuClick = { onBack() }) },
         bottomBar = {
             PentagonoBottomBar(
                 onSearchClick = { onSearchDueño() },
@@ -42,36 +43,22 @@ fun ConfiguracionScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(colorScheme.background)
-                .padding(16.dp)
+            modifier = Modifier.padding(innerPadding).fillMaxSize().background(colorScheme.background).padding(16.dp)
         ) {
-            // Datos del dueño actual
-            Text(
-                "Dueño Actual",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.primary
-            )
+            Text("Dueño Actual", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
 
             Spacer(Modifier.height(12.dp))
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
-            ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text("ID: ${dueñoActual.id_dueño}", style = MaterialTheme.typography.bodySmall)
-                        Text("Nombre: ${dueñoActual.nombre}", style = MaterialTheme.typography.titleMedium)
-                        Text("Contraseña: ${"*".repeat(dueñoActual.contraseña.length)}", style = MaterialTheme.typography.bodyMedium)
+                        Text("ID: ${dueñoActual.id_dueño}")
+                        Text("Nombre: ${dueñoActual.nombre}")
+                        Text("Contraseña: ${"*".repeat(dueñoActual.contraseña.length)}")
                     }
                     IconButton(onClick = { onEditDueño(dueñoActual) }) {
                         Icon(Icons.Filled.Edit, contentDescription = "Editar Dueño Actual")
@@ -81,33 +68,22 @@ fun ConfiguracionScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            Text(
-                "Otros Dueños",
-                style = MaterialTheme.typography.headlineSmall,
-                color = colorScheme.primary
-            )
+            Text("Otros Dueños", style = MaterialTheme.typography.headlineSmall, color = colorScheme.primary)
 
             Spacer(Modifier.height(12.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(dueños) { dueño ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
-                    ) {
+                    Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("ID: ${dueño.id_dueño}", style = MaterialTheme.typography.bodySmall)
-                                Text("Nombre: ${dueño.nombre}", style = MaterialTheme.typography.titleMedium)
-                                Text("Contraseña: ${"*".repeat(dueño.contraseña.length)}", style = MaterialTheme.typography.bodyMedium)
+                                Text("ID: ${dueño.id_dueño}")
+                                Text("Nombre: ${dueño.nombre}")
+                                Text("Contraseña: ${"*".repeat(dueño.contraseña.length)}")
                             }
                             IconButton(onClick = { onEditDueño(dueño) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Dueño")
@@ -117,31 +93,5 @@ fun ConfiguracionScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ConfiguracionScreenPreviewLight() {
-    val dueñoActual = Dueño(1, "Administrador", "admin123")
-    val dueñosDemo = listOf(
-        Dueño(2, "Carlos", "pass123"),
-        Dueño(3, "Ana", "clave456")
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        ConfiguracionScreen(dueñoActual = dueñoActual, dueños = dueñosDemo)
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ConfiguracionScreenPreviewDark() {
-    val dueñoActual = Dueño(1, "Administrador", "admin123")
-    val dueñosDemo = listOf(
-        Dueño(2, "Carlos", "pass123"),
-        Dueño(3, "Ana", "clave456")
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        ConfiguracionScreen(dueñoActual = dueñoActual, dueños = dueñosDemo)
     }
 }

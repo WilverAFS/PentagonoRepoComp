@@ -8,22 +8,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ingsoftware.pentagono.model.Empleado
+import com.ingsoftware.pentagono.data.EmpleadoEntity
+import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmpleadosScreen(
-    empleados: List<Empleado> = emptyList(),
+    viewModel: EmpleadoViewModel,
     onBack: () -> Unit = {},
     onAddEmpleado: () -> Unit = {},
     onSearchEmpleado: () -> Unit = {},
-    onEditEmpleado: (Empleado) -> Unit = {}
+    onEditEmpleado: (EmpleadoEntity) -> Unit = {}
 ) {
+    val empleados by viewModel.empleados.collectAsState() // Observamos el flujo de datos
+
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -86,29 +89,5 @@ fun EmpleadosScreen(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun EmpleadosScreenPreviewLight() {
-    val empleadosDemo = listOf(
-        Empleado(1, "Carlos Pérez", "9511111111", "carlos@mail.com", "Supervisor", "Calle Hidalgo #45"),
-        Empleado(2, "Ana López", "9512222222", "ana@mail.com", "Administradora", "Av. Juárez #78")
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        EmpleadosScreen(empleados = empleadosDemo)
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun EmpleadosScreenPreviewDark() {
-    val empleadosDemo = listOf(
-        Empleado(1, "Carlos Pérez", "9511111111", "carlos@mail.com", "Supervisor", "Calle Hidalgo #45"),
-        Empleado(2, "Ana López", "9512222222", "ana@mail.com", "Administradora", "Av. Juárez #78")
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        EmpleadosScreen(empleados = empleadosDemo)
     }
 }

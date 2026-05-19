@@ -5,27 +5,29 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ingsoftware.pentagono.model.Cliente
+import com.ingsoftware.pentagono.data.ClienteEntity
+import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientesScreen(
-    clientes: List<Cliente> = emptyList(),
+    viewModel: ClienteViewModel,
     onBack: () -> Unit = {},
     onAddCliente: () -> Unit = {},
     onSearchCliente: () -> Unit = {},
-    onEditCliente: (Cliente) -> Unit = {}
+    onEditCliente: (ClienteEntity) -> Unit = {}
 ) {
+    val clientes by viewModel.clientes.collectAsState() // Observamos el flujo de datos
+
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -36,7 +38,6 @@ fun ClientesScreen(
             )
         },
         bottomBar = {
-            // Barra inferior con botones de acción
             PentagonoBottomBar(
                 onSearchClick = { onSearchCliente() },
                 onAddClick = { onAddCliente() }
@@ -91,26 +92,3 @@ fun ClientesScreen(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ClientesScreenPreviewLight() {
-    val clientesDemo = listOf(
-        Cliente(1, "María Martínez", "9511234567", "maria@mail.com", "Calle Reforma #123"),
-        Cliente(2, "José Torres", "9517654321", "jose@mail.com", "Av. Universidad #456")
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        ClientesScreen(clientes = clientesDemo)
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ClientesScreenPreviewDark() {
-    val clientesDemo = listOf(
-        Cliente(1, "María Martínez", "9511234567", "maria@mail.com", "Calle Reforma #123"),
-        Cliente(2, "José Torres", "9517654321", "jose@mail.com", "Av. Universidad #456")
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        ClientesScreen(clientes = clientesDemo)
-    }
-}

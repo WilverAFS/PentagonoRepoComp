@@ -2,7 +2,7 @@ package com.ingsoftware.pentagono.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.ingsoftware.pentagono.model.*
+
 
 @Database(
     entities = [

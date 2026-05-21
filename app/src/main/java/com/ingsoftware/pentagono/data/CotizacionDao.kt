@@ -1,7 +1,7 @@
 package com.ingsoftware.pentagono.data
 
 import androidx.room.*
-import com.ingsoftware.pentagono.data.CotizacionEntity
+
 
 @Dao
 interface CotizacionDao {

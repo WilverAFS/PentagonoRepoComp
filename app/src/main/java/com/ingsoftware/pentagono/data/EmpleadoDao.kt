@@ -1,7 +1,6 @@
 package com.ingsoftware.pentagono.data
 
 import androidx.room.*
-import com.ingsoftware.pentagono.data.EmpleadoEntity
 
 @Dao
 interface EmpleadoDao {

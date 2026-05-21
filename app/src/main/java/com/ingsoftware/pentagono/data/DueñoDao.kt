@@ -22,4 +22,8 @@ interface DueñoDao {
 
     @Query("SELECT * FROM dueños WHERE nombre LIKE '%' || :nombre || '%'")
     suspend fun findByNombre(nombre: String): List<DueñoEntity>
+
+    //autenticacion
+    @Query("SELECT * FROM dueños WHERE nombre = :nombre AND contraseña = :contraseña LIMIT 1")
+    suspend fun findByCredenciales(nombre: String, contraseña: String): DueñoEntity?
 }

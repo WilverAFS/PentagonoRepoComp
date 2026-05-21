@@ -1,5 +1,4 @@
 package com.ingsoftware.pentagono.view
-
 import android.text.style.AlignmentSpan
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,8 +15,9 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
+    dueñoId: Int,                          // ✅ nuevo parámetro
     onNavigate: (String) -> Unit = {},
-    onBack: () -> Unit = {} // nueva acción para regresar
+    onBack: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -25,7 +25,7 @@ fun MenuScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Menú de Opciones",
-                onMenuClick = { onBack() } // al dar clic regresa a la vista anterior
+                onMenuClick = { onBack() }
             )
         }
     ) { innerPadding ->
@@ -50,8 +50,9 @@ fun MenuScreen(
             MenuButton("Empleados", Icons.Filled.Person, colorScheme.secondary, colorScheme.onPrimary) {
                 onNavigate("empleados")
             }
+            // ✅ ahora pasa el id del dueño autenticado
             MenuButton("Configuración", Icons.Filled.Settings, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("configuracion")
+                onNavigate("configuracion/$dueñoId")
             }
             MenuButton("Logs", Icons.Filled.List, colorScheme.secondary, colorScheme.onPrimary) {
                 onNavigate("logs")
@@ -59,7 +60,6 @@ fun MenuScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // 🔹 Nueva fila con Inicio y Salir juntos
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -81,7 +81,7 @@ fun MenuScreen(
                 }
 
                 Button(
-                    onClick = { onNavigate("start") },
+                    onClick = { onNavigate("start/$dueñoId") }, // ✅ también pasa el id
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
@@ -96,10 +96,10 @@ fun MenuScreen(
                     }
                 }
             }
-
         }
     }
 }
+
 
 @Composable
 fun MenuButton(
@@ -122,24 +122,6 @@ fun MenuButton(
             Text(text, color = textColor)
             Spacer(Modifier.width(8.dp))
             Icon(icon, contentDescription = text, tint = textColor)
-
-
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MenuScreenPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        MenuScreen()
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun MenuScreenPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        MenuScreen()
     }
 }

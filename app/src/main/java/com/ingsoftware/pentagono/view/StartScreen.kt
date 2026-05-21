@@ -18,25 +18,24 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import com.ingsoftware.pentagono.R
+import com.ingsoftware.pentagono.data.DueñoEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartScreen(
-    onMenuClick: () -> Unit = {},
-    onExit: () -> Unit = {} //Nuevo parametro para salir
+    dueño: DueñoEntity,              // ✅ recibe el dueño autenticado
+    onMenuClick: (Int) -> Unit = {},
+    onExit: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
-
     Scaffold(
         topBar = {
-            // Aquí reutilizamos la barra superior institucional
             PentagonoTopBar(
                 title = "Vidrios y Cristales Pentágono",
-                onMenuClick = onMenuClick
+                onMenuClick = { onMenuClick (dueño.id_dueño) }
             )
         }
     ) { innerPadding ->
-        // Scroll vertical aplicado a toda la columna
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -44,11 +43,20 @@ fun StartScreen(
                 .background(colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Información del negocio en tarjeta
+            // ✅ Saludo personalizado
+            Text(
+                text = "Bienvenido, ${dueño.nombre}",
+                style = MaterialTheme.typography.headlineSmall,
+                color = colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                textAlign = TextAlign.Center
+            )
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(10.dp),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
             ) {
                 Column(
@@ -140,7 +148,6 @@ fun StartScreen(
         }
     }
 }
-
 @Composable
 fun ServiceCard(title: String, description: String, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
@@ -155,7 +162,6 @@ fun ServiceCard(title: String, description: String, modifier: Modifier = Modifie
         }
     }
 }
-
 @Composable
 fun DashboardCard(icon: Int, title: String, value: String, modifier: Modifier = Modifier, valueColor: Color = MaterialTheme.colorScheme.onSurface) {
     val colorScheme = MaterialTheme.colorScheme
@@ -191,21 +197,5 @@ fun DashboardCard(icon: Int, title: String, value: String, modifier: Modifier = 
                 modifier = Modifier.fillMaxWidth()
             )
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun StartScreenPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        StartScreen()
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun StartScreenPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        StartScreen()
     }
 }

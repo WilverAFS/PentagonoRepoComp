@@ -12,7 +12,23 @@ class DueñoViewModel(private val repository: DueñoRepository) : ViewModel() {
     private val _dueños = MutableStateFlow<List<DueñoEntity>>(emptyList())
     val dueños: StateFlow<List<DueñoEntity>> = _dueños
 
-    init { loadDueños() }
+    init {
+        viewModelScope.launch {
+            val lista = repository.getDueños()
+            if (lista.isEmpty()) {
+                // ✅ Insertar dueño administrador por defecto
+                repository.addDueño(
+                    DueñoEntity(
+                        id_dueño = -1,
+                        nombre = "admin",
+                        contraseña = "admin"
+                    )
+                )
+            }
+            // Cargar dueños (incluyendo el admin si se insertó)
+            loadDueños()
+        }
+    }
 
     fun loadDueños() {
         viewModelScope.launch { _dueños.value = repository.getDueños() }
@@ -42,5 +58,9 @@ class DueñoViewModel(private val repository: DueñoRepository) : ViewModel() {
     // 🔎 Métodos de búsqueda
     suspend fun findById(id: Int): DueñoEntity? = repository.findById(id)
     suspend fun findByNombre(nombre: String): List<DueñoEntity> = repository.findByNombre(nombre)
-}
 
+    // 🔑 Autenticación
+    suspend fun autenticar(nombre: String, contrasena: String): DueñoEntity? {
+        return repository.autenticar(nombre, contrasena)
+    }
+}

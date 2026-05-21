@@ -39,8 +39,6 @@ class MainActivity : ComponentActivity() {
                     .fallbackToDestructiveMigration()
                     .build()
 
-
-                // ✅ Instanciamos los ViewModels
                 val clienteViewModel = ClienteViewModel(ClienteRepository(db.clienteDao()))
                 val empleadoViewModel = EmpleadoViewModel(EmpleadoRepository(db.empleadoDao()))
                 val cotizacionViewModel = CotizacionViewModel(CotizacionRepository(db.cotizacionDao()))
@@ -53,22 +51,40 @@ class MainActivity : ComponentActivity() {
                     startDestination = "login"
                 ) {
                     composable("login") {
-                        LoginScreen(onLoginSuccess = { navController.navigate("start") })
-                    }
-                    composable("start") {
-                        StartScreen(
-                            onMenuClick = { navController.navigate("menu") },
-                            onExit = { finish() }
+                        LoginScreen(
+                            viewModel = dueñoViewModel,
+                            onLoginSuccess = { dueño ->
+                                navController.navigate("start/${dueño.id_dueño}")
+                            }
                         )
                     }
-                    composable("menu") {
-                        MenuScreen(
-                            onNavigate = { destino -> navController.navigate(destino) },
-                            onBack = { navController.popBackStack() }
-                        )
-                    }
+                    composable("start/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        val dueños by dueñoViewModel.dueños.collectAsState()
+                        val dueño = dueños.find { it.id_dueño == id }
 
-                    // ✅ Clientes
+                        if (dueño != null) {
+                            StartScreen(
+                                dueño = dueño,
+                                onMenuClick = { idDueño -> navController.navigate("menu/$idDueño") },
+                                onExit = { finish() }
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    composable("menu/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        if (id != null) {
+                            MenuScreen(
+                                dueñoId = id,
+                                onNavigate = { destino -> navController.navigate(destino) },
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                    }
                     composable("clientes") {
                         ClientesScreen(
                             viewModel = clienteViewModel,
@@ -80,7 +96,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable("buscarCliente") {
                         BuscarClienteScreen(
                             viewModel = clienteViewModel,
@@ -90,7 +105,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable("nuevoCliente") {
                         NuevoClienteScreen(
                             viewModel = clienteViewModel,
@@ -114,8 +128,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-
-                    // ✅ Empleados
                     composable("empleados") {
                         EmpleadosScreen(
                             viewModel = empleadoViewModel,
@@ -127,14 +139,12 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable("nuevoEmpleado") {
                         NuevoEmpleadoScreen(
                             viewModel = empleadoViewModel,
                             onBack = { navController.popBackStack() }
                         )
                     }
-
                     composable("buscarEmpleado") {
                         BuscarEmpleadoScreen(
                             viewModel = empleadoViewModel,
@@ -144,7 +154,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable("editarEmpleado/{curp}") { backStackEntry ->
                         val curp = backStackEntry.arguments?.getString("curp")
                         val empleados by empleadoViewModel.empleados.collectAsState()
@@ -162,8 +171,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-
-                    // ✅ Cotizaciones
                     composable("cotizaciones") {
                         CotizacionScreen(
                             viewModel = cotizacionViewModel,
@@ -175,8 +182,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
-                    // ✅ Órdenes
                     composable("ordenes") {
                         OrdenesScreen(
                             viewModel = ordenViewModel,
@@ -188,8 +193,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
-                    // ✅ Logs
                     composable("logs") {
                         LogsScreen(
                             viewModel = logViewModel,
@@ -197,20 +200,59 @@ class MainActivity : ComponentActivity() {
                             onSearchLog = { navController.navigate("buscarLog") }
                         )
                     }
+                    composable("configuracion/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        val dueños by dueñoViewModel.dueños.collectAsState()
+                        val dueño = dueños.find { it.id_dueño == id }
 
-                    // ✅ Configuración (Dueños)
-                    composable("configuracion") {
-                        val dueñoActual = DueñoEntity(1, "Administrador", "admin123")
-                        ConfiguracionScreen(
+                        if (dueño != null) {
+                            ConfiguracionScreen(
+                                viewModel = dueñoViewModel,
+                                dueñoActual = dueño, // ✅ dueño autenticado
+                                onBack = { navController.popBackStack() },
+                                onAddDueño = { navController.navigate("nuevoDueño") },
+                                onSearchDueño = { navController.navigate("buscarDueño") },
+                                onEditDueño = { dueno ->
+                                    navController.navigate("editarDueño/${dueno.id_dueño}")
+                                }
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+                    composable("buscarDueño") {
+                        BuscarDueñoScreen(
                             viewModel = dueñoViewModel,
-                            dueñoActual = dueñoActual,
                             onBack = { navController.popBackStack() },
-                            onAddDueño = { navController.navigate("nuevoDueño") },
-                            onSearchDueño = { navController.navigate("buscarDueño") },
                             onEditDueño = { dueño ->
                                 navController.navigate("editarDueño/${dueño.id_dueño}")
                             }
                         )
+                    }
+                    composable("nuevoDueño") {
+                        NuevoDueñoScreen(
+                            viewModel = dueñoViewModel,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("editarDueño/{id}") { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                        val dueños by dueñoViewModel.dueños.collectAsState()
+                        val dueño = dueños.find { it.id_dueño == id }
+
+                        if (dueño != null) {
+                            EditarDueñoScreen(
+                                viewModel = dueñoViewModel,
+                                dueño = dueño,
+                                onBack = { navController.popBackStack() }
+                            )
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
                     }
                 }
             }

@@ -22,34 +22,36 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.R
+import com.ingsoftware.pentagono.data.DueñoEntity
+import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
-
+fun LoginScreen(
+    viewModel: DueñoViewModel,
+    onLoginSuccess: (DueñoEntity) -> Unit = {}   // ✅ ahora devuelve el dueño autenticado
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // Mensajes de error por campo (null = sin error)
     var usernameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
-
     var cargando by remember { mutableStateOf(false) }
 
     val focusPassword = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val colorScheme = MaterialTheme.colorScheme
 
-    // Lógica de autenticación extraída (igual que LoginActivity)
+    // ✅ Scope para corrutinas
+    val coroutineScope = rememberCoroutineScope()
+
     fun iniciarSesion() {
-        // Limpiar errores previos
         usernameError = null
         passwordError = null
 
-        // Validar campos vacíos
         var esValido = true
         if (username.isBlank()) {
             usernameError = "Ingresa tu usuario"
@@ -64,13 +66,15 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
         cargando = true
         focusManager.clearFocus()
 
-        // TODO: reemplazar con Retrofit / Firebase cuando se conecte la BD
-        if (username == "admin" && password == "admin") {
+        // ✅ Corrutina para consultar la BD
+        coroutineScope.launch {
+            val dueño = viewModel.autenticar(username.trim(), password.trim())
             cargando = false
-            onLoginSuccess()
-        } else {
-            cargando = false
-            passwordError = "Usuario o contraseña incorrectos"
+            if (dueño != null) {
+                onLoginSuccess(dueño)   // ✅ pasa el dueño autenticado
+            } else {
+                passwordError = "Usuario o contraseña incorrectos"
+            }
         }
     }
 
@@ -84,7 +88,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
     ) {
         Spacer(Modifier.height(20.dp))
 
-        // Logo corporativo centrado arriba
         Image(
             painter = painterResource(id = R.drawable.ic_logo_vidrieria),
             contentDescription = "Logo Vidriería Pentágono",
@@ -93,7 +96,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
                 .padding(bottom = 24.dp)
         )
 
-        // Título
         Text(
             "Iniciar Sesión",
             style = MaterialTheme.typography.headlineMedium,
@@ -102,7 +104,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
 
         Spacer(Modifier.height(24.dp))
 
-        // Campo usuario
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -129,7 +130,6 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
 
         Spacer(Modifier.height(8.dp))
 
-        // Campo contraseña
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -165,17 +165,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
                 .focusRequester(focusPassword)
         )
 
-        // Link recuperar contraseña
-        TextButton(
-            onClick = { /* TODO: navegar a RecuperarContrasenaScreen */ },
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text("¿Olvidaste tu contraseña?", color = colorScheme.primary)
-        }
-
         Spacer(Modifier.height(16.dp))
 
-        // Botón ingresar
         Button(
             onClick = { iniciarSesion() },
             enabled = !cargando,
@@ -194,21 +185,5 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
                 Text("Ingresar", color = colorScheme.onSecondary)
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        LoginScreen()
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun LoginScreenPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        LoginScreen()
     }
 }

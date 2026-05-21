@@ -11,4 +11,9 @@ class DueñoRepository(private val dao: DueñoDao) {
     // 🔎 Búsquedas
     suspend fun findById(id: Int): DueñoEntity? = dao.findById(id)
     suspend fun findByNombre(nombre: String): List<DueñoEntity> = dao.findByNombre(nombre)
+
+    // ✅ Autenticación
+    suspend fun autenticar(nombre: String, contraseña: String): DueñoEntity? {
+        return dao.findByCredenciales(nombre, contraseña)
+    }
 }

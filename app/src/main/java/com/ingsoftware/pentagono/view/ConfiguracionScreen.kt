@@ -8,14 +8,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ingsoftware.pentagono.model.Dueño
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.ingsoftware.pentagono.data.DueñoEntity
 import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
 
@@ -23,14 +21,13 @@ import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
 @Composable
 fun ConfiguracionScreen(
     viewModel: DueñoViewModel,
-    dueñoActual: DueñoEntity,
+    dueñoActual: DueñoEntity,                 // ✅ dueño autenticado
     onBack: () -> Unit = {},
     onAddDueño: () -> Unit = {},
     onSearchDueño: () -> Unit = {},
     onEditDueño: (DueñoEntity) -> Unit = {}
 ) {
     val dueños by viewModel.dueños.collectAsState()
-
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -43,22 +40,28 @@ fun ConfiguracionScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding).fillMaxSize().background(colorScheme.background).padding(16.dp)
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(colorScheme.background)
+                .padding(16.dp)
         ) {
+            // ✅ Datos del dueño autenticado
             Text("Dueño Actual", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
-
             Spacer(Modifier.height(12.dp))
 
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
                         Text("ID: ${dueñoActual.id_dueño}")
                         Text("Nombre: ${dueñoActual.nombre}")
-                        Text("Contraseña: ${"*".repeat(dueñoActual.contraseña.length)}")
+                        Text("Contraseña: ${"*".repeat(dueñoActual.contraseña.length)}") // ✅ oculta contraseña
                     }
                     IconButton(onClick = { onEditDueño(dueñoActual) }) {
                         Icon(Icons.Filled.Edit, contentDescription = "Editar Dueño Actual")
@@ -68,15 +71,17 @@ fun ConfiguracionScreen(
 
             Spacer(Modifier.height(24.dp))
 
+            // ✅ Lista de otros dueños
             Text("Otros Dueños", style = MaterialTheme.typography.headlineSmall, color = colorScheme.primary)
-
             Spacer(Modifier.height(12.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(dueños) { dueño ->
+                items(dueños.filter { it.id_dueño != dueñoActual.id_dueño }) { dueño -> // ✅ excluye al actual
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {

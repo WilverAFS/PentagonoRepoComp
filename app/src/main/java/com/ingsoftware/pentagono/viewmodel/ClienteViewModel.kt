@@ -13,14 +13,10 @@ class ClienteViewModel(private val repository: ClienteRepository) : ViewModel() 
     private val _clientes = MutableStateFlow<List<ClienteEntity>>(emptyList())
     val clientes: StateFlow<List<ClienteEntity>> = _clientes
 
-    init {
-        loadClientes()
-    }
+    init { loadClientes() }
 
     fun loadClientes() {
-        viewModelScope.launch {
-            _clientes.value = repository.getClientes()
-        }
+        viewModelScope.launch { _clientes.value = repository.getClientes() }
     }
 
     fun addCliente(cliente: ClienteEntity) {
@@ -43,4 +39,14 @@ class ClienteViewModel(private val repository: ClienteRepository) : ViewModel() 
             loadClientes()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findByTelefono(telefono: Int): List<ClienteEntity> {
+        return repository.findByTelefono(telefono)
+    }
+
+    suspend fun findByNombre(nombre: String): List<ClienteEntity> {
+        return repository.findByNombre(nombre)
+    }
 }
+

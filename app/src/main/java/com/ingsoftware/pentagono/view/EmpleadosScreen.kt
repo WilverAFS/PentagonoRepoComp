@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.EmpleadoEntity
 import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
@@ -25,7 +26,7 @@ fun EmpleadosScreen(
     onSearchEmpleado: () -> Unit = {},
     onEditEmpleado: (EmpleadoEntity) -> Unit = {}
 ) {
-    val empleados by viewModel.empleados.collectAsState() // Observamos el flujo de datos
+    val empleados by viewModel.empleados.collectAsState()
 
     val colorScheme = MaterialTheme.colorScheme
 
@@ -73,18 +74,56 @@ fun EmpleadosScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("ID: ${empleado.id_empleado}", style = MaterialTheme.typography.bodySmall)
-                                Text(empleado.nombre, style = MaterialTheme.typography.titleMedium)
-                                Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Correo: ${empleado.correo}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Puesto: ${empleado.puesto}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dir: ${empleado.direccion}", style = MaterialTheme.typography.bodyMedium)
+                            Column(
+                                modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
+                            ) {
+                                Text(
+                                    "CURP (PK): ${empleado.curp}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                val nombreCompleto = listOfNotNull(
+                                    empleado.nombre.takeIf { it.isNotBlank() },
+                                    empleado.apellidoPaterno.takeIf { it.isNotBlank() },
+                                    empleado.apellidoMaterno.takeIf { it.isNotBlank() }
+                                ).joinToString(" ")
+
+                                Text(
+                                    nombreCompleto,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 2, // ✅ permite salto de línea
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Text(
+                                    "Tel: ${empleado.telefono}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Text(
+                                    "Correo: ${empleado.correo ?: "-"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Text(
+                                    "Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 3, // ✅ dirección larga se parte en varias líneas
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
+
                             IconButton(onClick = { onEditEmpleado(empleado) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Empleado")
                             }
                         }
+
                     }
                 }
             }

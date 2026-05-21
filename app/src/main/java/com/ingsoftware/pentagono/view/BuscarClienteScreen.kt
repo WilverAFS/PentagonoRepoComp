@@ -53,21 +53,21 @@ fun BuscarClienteScreen(
                     } else {
                         when {
                             query.matches(Regex("^[0-9]+$")) -> {
-                                // Si es número, buscar por ID exacto o teléfono exacto
-                                clientes.filter {
-                                    it.id_cliente.toString() == query || it.telefono == query
-                                }
+                                // Si es número, buscar por teléfono exacto
+                                clientes.filter { it.telefono == query.toInt() }
                             }
                             else -> {
-                                // Si es texto, buscar coincidencias en nombre
+                                // Si es texto, buscar coincidencias en nombre o apellidos
                                 clientes.filter {
-                                    it.nombre.contains(query, ignoreCase = true)
+                                    it.nombre.contains(query, ignoreCase = true) ||
+                                            (it.apellidoPaterno?.contains(query, ignoreCase = true) ?: false) ||
+                                            (it.apellidoMaterno?.contains(query, ignoreCase = true) ?: false)
                                 }
                             }
                         }
                     }
                 },
-                label = { Text("Buscar por ID, Nombre o Teléfono") },
+                label = { Text("Buscar por Teléfono o Nombre") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -91,11 +91,10 @@ fun BuscarClienteScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("ID: ${cliente.id_cliente}", style = MaterialTheme.typography.bodySmall)
-                                Text(cliente.nombre, style = MaterialTheme.typography.titleMedium)
-                                Text("Tel: ${cliente.telefono}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Correo: ${cliente.correo}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dir: ${cliente.direccion}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Teléfono (PK): ${cliente.telefono}", style = MaterialTheme.typography.bodySmall)
+                                Text("${cliente.nombre} ${cliente.apellidoPaterno} ${cliente.apellidoMaterno ?: ""}", style = MaterialTheme.typography.titleMedium)
+                                Text("Correo: ${cliente.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Dirección: ${cliente.calle} #${cliente.numeroExterior}${cliente.numeroInterior?.let { " Int. $it" } ?: ""}, ${cliente.colonia}, ${cliente.municipio}, ${cliente.estado}", style = MaterialTheme.typography.bodyMedium)
                             }
                             IconButton(onClick = { onEditCliente(cliente) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Cliente")

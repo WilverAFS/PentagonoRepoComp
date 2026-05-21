@@ -28,27 +28,42 @@ fun BuscarEmpleadoScreen(
 
     val colorScheme = MaterialTheme.colorScheme
 
-    Scaffold(topBar = { PentagonoTopBar(title = "Buscar Empleado", onMenuClick = { onBack() }) }) { innerPadding ->
+    Scaffold(
+        topBar = { PentagonoTopBar(title = "Buscar Empleado", onMenuClick = { onBack() }) }
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding).fillMaxSize().background(colorScheme.background).padding(16.dp),
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(colorScheme.background)
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedTextField(
                 value = query,
                 onValueChange = {
                     query = it
-                    resultados = if (query.isBlank()) emptyList() else {
+                    resultados = if (query.isBlank()) {
+                        emptyList()
+                    } else {
                         when {
+                            // Si es numérico, buscar por teléfono exacto
                             query.matches(Regex("^[0-9]+$")) -> {
-                                empleados.filter { it.id_empleado.toString() == query || it.telefono == query }
+                                empleados.filter { it.telefono == query }
                             }
                             else -> {
-                                empleados.filter { it.nombre.contains(query, ignoreCase = true) }
+                                // Si es texto, buscar por CURP exacto o coincidencias en nombre/apellidos
+                                empleados.filter {
+                                    it.curp.equals(query, ignoreCase = true) ||
+                                            it.nombre.contains(query, ignoreCase = true) ||
+                                            it.apellidoPaterno.contains(query, ignoreCase = true) ||
+                                            it.apellidoMaterno.contains(query, ignoreCase = true)
+                                }
                             }
                         }
                     }
                 },
-                label = { Text("Buscar por ID, Nombre o Teléfono") },
+                label = { Text("Buscar por CURP, Nombre o Teléfono") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -60,19 +75,23 @@ fun BuscarEmpleadoScreen(
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(resultados) { empleado ->
-                    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = colorScheme.surface)) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+                    ) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("ID: ${empleado.id_empleado}", style = MaterialTheme.typography.bodySmall)
-                                Text(empleado.nombre, style = MaterialTheme.typography.titleMedium)
+                                Text("CURP (PK): ${empleado.curp}", style = MaterialTheme.typography.bodySmall)
+                                Text("${empleado.nombre} ${empleado.apellidoPaterno} ${empleado.apellidoMaterno}", style = MaterialTheme.typography.titleMedium)
                                 Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Correo: ${empleado.correo}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Puesto: ${empleado.puesto}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dir: ${empleado.direccion}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Correo: ${empleado.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}", style = MaterialTheme.typography.bodyMedium)
                             }
                             IconButton(onClick = { onEditEmpleado(empleado) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Empleado")

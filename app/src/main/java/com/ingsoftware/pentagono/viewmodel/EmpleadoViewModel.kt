@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel() {
+
     private val _empleados = MutableStateFlow<List<EmpleadoEntity>>(emptyList())
     val empleados: StateFlow<List<EmpleadoEntity>> = _empleados
 
@@ -38,4 +39,18 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
             loadEmpleados()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findByCurp(curp: String): EmpleadoEntity? {
+        return repository.findByCurp(curp)
+    }
+
+    suspend fun findByNombre(nombre: String): List<EmpleadoEntity> {
+        return repository.findByNombre(nombre)
+    }
+
+    suspend fun findByTelefono(telefono: String): List<EmpleadoEntity> {
+        return repository.findByTelefono(telefono)
+    }
 }
+

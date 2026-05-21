@@ -1,10 +1,15 @@
 package com.ingsoftware.pentagono.data
 
-import com.ingsoftware.pentagono.model.Cotizacion
+class CotizacionRepository(private val dao: CotizacionDao) {
 
-class CotizacionRepository (private val dao: CotizacionDao){
-    suspend fun getCotizaciones() = dao.getAllCotizaciones()
-    suspend fun addCotizacion(cotizacion: CotizacionEntity) = dao.insertCotizacion(cotizacion)
+    // CRUD
+    suspend fun getCotizaciones(): List<CotizacionEntity> = dao.getCotizaciones()
+    suspend fun addCotizacion(cotizacion: CotizacionEntity) = dao.addCotizacion(cotizacion)
     suspend fun updateCotizacion(cotizacion: CotizacionEntity) = dao.updateCotizacion(cotizacion)
     suspend fun deleteCotizacion(cotizacion: CotizacionEntity) = dao.deleteCotizacion(cotizacion)
+
+    // 🔎 Búsquedas
+    suspend fun findById(id: Int): CotizacionEntity? = dao.findById(id)
+    suspend fun findByEstadoCotizacion(estado: String): List<CotizacionEntity> = dao.findByEstadoCotizacion(estado)
+    suspend fun findByEstadoPago(estadoPago: String): List<CotizacionEntity> = dao.findByEstadoPago(estadoPago)
 }

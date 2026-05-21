@@ -1,18 +1,29 @@
 package com.ingsoftware.pentagono.data
+
 import androidx.room.*
-import com.ingsoftware.pentagono.model.Cotizacion
+import com.ingsoftware.pentagono.data.CotizacionEntity
 
 @Dao
 interface CotizacionDao {
     @Query("SELECT * FROM cotizaciones")
-    suspend fun getAllCotizaciones(): List<CotizacionEntity>
+    suspend fun getCotizaciones(): List<CotizacionEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCotizacion(cotizacion: CotizacionEntity)
+    suspend fun addCotizacion(cotizacion: CotizacionEntity)
 
     @Update
     suspend fun updateCotizacion(cotizacion: CotizacionEntity)
 
     @Delete
     suspend fun deleteCotizacion(cotizacion: CotizacionEntity)
+
+    // 🔎 Búsquedas específicas
+    @Query("SELECT * FROM cotizaciones WHERE id_cotizacion = :id")
+    suspend fun findById(id: Int): CotizacionEntity?
+
+    @Query("SELECT * FROM cotizaciones WHERE estado_cotizacion = :estado")
+    suspend fun findByEstadoCotizacion(estado: String): List<CotizacionEntity>
+
+    @Query("SELECT * FROM cotizaciones WHERE estado_pago = :estadoPago")
+    suspend fun findByEstadoPago(estadoPago: String): List<CotizacionEntity>
 }

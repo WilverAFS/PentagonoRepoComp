@@ -38,4 +38,9 @@ class DueñoViewModel(private val repository: DueñoRepository) : ViewModel() {
             loadDueños()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findById(id: Int): DueñoEntity? = repository.findById(id)
+    suspend fun findByNombre(nombre: String): List<DueñoEntity> = repository.findByNombre(nombre)
 }
+

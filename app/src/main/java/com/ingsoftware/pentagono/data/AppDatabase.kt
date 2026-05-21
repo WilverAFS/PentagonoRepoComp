@@ -13,7 +13,8 @@ import com.ingsoftware.pentagono.model.*
         DueñoEntity::class,
         LogEntity::class
     ],
-    version = 1
+    version = 2,
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun clienteDao(): ClienteDao

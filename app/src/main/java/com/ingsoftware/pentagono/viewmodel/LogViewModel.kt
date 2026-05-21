@@ -38,4 +38,11 @@ class LogViewModel(private val repository: LogRepository) : ViewModel() {
             loadLogs()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findById(id: Int): LogEntity? = repository.findById(id)
+    suspend fun findByDueño(idDueño: Int): List<LogEntity> = repository.findByDueño(idDueño)
+    suspend fun findByTipo(tipo: String): List<LogEntity> = repository.findByTipo(tipo)
+    suspend fun findByFecha(fecha: String): List<LogEntity> = repository.findByFecha(fecha)
 }
+

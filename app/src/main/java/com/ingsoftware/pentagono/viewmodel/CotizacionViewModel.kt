@@ -38,4 +38,10 @@ class CotizacionViewModel(private val repository: CotizacionRepository) : ViewMo
             loadCotizaciones()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findById(id: Int): CotizacionEntity? = repository.findById(id)
+    suspend fun findByEstadoCotizacion(estado: String): List<CotizacionEntity> = repository.findByEstadoCotizacion(estado)
+    suspend fun findByEstadoPago(estadoPago: String): List<CotizacionEntity> = repository.findByEstadoPago(estadoPago)
 }
+

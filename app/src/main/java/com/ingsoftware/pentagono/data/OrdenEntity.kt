@@ -1,7 +1,8 @@
 package com.ingsoftware.pentagono.data
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ingsoftware.pentagono.model.*
+import com.ingsoftware.pentagono.model.EstadoOrden
 
 @Entity(tableName = "ordenes")
 data class OrdenEntity(

@@ -18,6 +18,7 @@ import com.ingsoftware.pentagono.model.EstadoCotizacion
 import com.ingsoftware.pentagono.model.EstadoPago
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.style.TextOverflow
 import com.ingsoftware.pentagono.data.CotizacionEntity
 import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
 
@@ -31,7 +32,6 @@ fun CotizacionScreen(
     onEditCotizacion: (CotizacionEntity) -> Unit = {}
 ) {
     val cotizaciones by viewModel.cotizaciones.collectAsState()
-
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -52,7 +52,8 @@ fun CotizacionScreen(
                 .background(colorScheme.background)
                 .padding(16.dp)
         ) {
-            Text("Listado de Cotizaciones",
+            Text(
+                "Listado de Cotizaciones",
                 style = MaterialTheme.typography.headlineMedium,
                 color = colorScheme.primary
             )
@@ -66,23 +67,58 @@ fun CotizacionScreen(
                         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("ID: ${cotizacion.id_cotizacion}")
-                                Text("Cliente: ${cotizacion.id_cliente}")
-                                Text("Fecha: ${cotizacion.fecha}")
-                                Text("Descripción: ${cotizacion.descripcion}")
-                                Text("Monto: $${cotizacion.monto}")
-                                Text("Estado: ${cotizacion.estado}")
-                                Text("Pago: ${cotizacion.pago}")
+                            Column(
+                                modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
+                            ) {
+                                Text(
+                                    "ID Cotización: ${cotizacion.id_cotizacion}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Fecha: ${cotizacion.fecha}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Descripción: ${cotizacion.descripcion ?: "-"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 3, // ✅ descripción larga se parte en varias líneas
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Monto: $${cotizacion.monto}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Estado Cotización: ${cotizacion.estado_cotizacion}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Estado Pago: ${cotizacion.estado_pago}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
+
                             IconButton(onClick = { onEditCotizacion(cotizacion) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Cotización")
                             }
                         }
+
                     }
                 }
             }

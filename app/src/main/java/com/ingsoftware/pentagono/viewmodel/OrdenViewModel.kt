@@ -38,4 +38,12 @@ class OrdenViewModel(private val repository: OrdenRepository) : ViewModel() {
             loadOrdenes()
         }
     }
+
+    // 🔎 Métodos de búsqueda
+    suspend fun findById(id: Int): OrdenEntity? = repository.findById(id)
+    suspend fun findByCotizacion(idCotizacion: Int): List<OrdenEntity> = repository.findByCotizacion(idCotizacion)
+    suspend fun findByEmpleado(idEmpleado: Int): List<OrdenEntity> = repository.findByEmpleado(idEmpleado)
+    suspend fun findByDueño(idDueño: Int): List<OrdenEntity> = repository.findByDueño(idDueño)
+    suspend fun findByEstado(estado: String): List<OrdenEntity> = repository.findByEstado(estado)
 }
+

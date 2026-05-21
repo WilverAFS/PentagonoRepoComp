@@ -1,13 +1,20 @@
 package com.ingsoftware.pentagono.data
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ingsoftware.pentagono.model.*
 
 @Entity(tableName = "clientes")
 data class ClienteEntity(
-    @PrimaryKey val id_cliente: Int,
-    val nombre: String,
-    val telefono: String,
-    val correo: String,
-    val direccion: String
+    @PrimaryKey val telefono: Int, // PK
+    @ColumnInfo(name = "nombre") val nombre: String,
+    @ColumnInfo(name = "apellido_paterno") val apellidoPaterno: String?,
+    @ColumnInfo(name = "apellido_materno") val apellidoMaterno: String?,
+    @ColumnInfo(name = "calle") val calle: String,
+    @ColumnInfo(name = "numero_exterior") val numeroExterior: Int,
+    @ColumnInfo(name = "numero_interior") val numeroInterior: String?,
+    @ColumnInfo(name = "colonia") val colonia: String,
+    @ColumnInfo(name = "municipio") val municipio: String,
+    @ColumnInfo(name = "estado") val estado: String,
+    @ColumnInfo(name = "correo") val correo: String?
 )

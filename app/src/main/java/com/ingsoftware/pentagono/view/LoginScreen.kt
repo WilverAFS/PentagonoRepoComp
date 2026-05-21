@@ -95,7 +95,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit = {}) {
         Button(
             onClick = {
                 //----------------------------------------------
-                //onLoginSuccess()//solo PRUEBAS BORRAR AL FINAL
+                onLoginSuccess()//solo PRUEBAS BORRAR AL FINAL
                 //-----------------------------------------------
                 when {
                     username.isBlank() -> {

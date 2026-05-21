@@ -31,9 +31,16 @@ class MainActivity : ComponentActivity() {
             PentagonoTheme {
                 val navController = rememberNavController()
                 val context = LocalContext.current
-                val db = Room.databaseBuilder(context, AppDatabase::class.java, "pentagono_db").build()
+                val db = Room.databaseBuilder(
+                    context,
+                    AppDatabase::class.java,
+                    "pentagono_db"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
 
-                // ✅ Instanciamos los ViewModels una sola vez y los compartimos
+
+                // ✅ Instanciamos los ViewModels
                 val clienteViewModel = ClienteViewModel(ClienteRepository(db.clienteDao()))
                 val empleadoViewModel = EmpleadoViewModel(EmpleadoRepository(db.empleadoDao()))
                 val cotizacionViewModel = CotizacionViewModel(CotizacionRepository(db.cotizacionDao()))
@@ -69,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             onAddCliente = { navController.navigate("nuevoCliente") },
                             onSearchCliente = { navController.navigate("buscarCliente") },
                             onEditCliente = { cliente ->
-                                navController.navigate("editarCliente/${cliente.id_cliente}")
+                                navController.navigate("editarCliente/${cliente.telefono}")
                             }
                         )
                     }
@@ -79,7 +86,7 @@ class MainActivity : ComponentActivity() {
                             viewModel = clienteViewModel,
                             onBack = { navController.popBackStack() },
                             onEditCliente = { cliente ->
-                                navController.navigate("editarCliente/${cliente.id_cliente}")
+                                navController.navigate("editarCliente/${cliente.telefono}")
                             }
                         )
                     }
@@ -90,10 +97,10 @@ class MainActivity : ComponentActivity() {
                             onBack = { navController.popBackStack() }
                         )
                     }
-                    composable("editarCliente/{id}") { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                    composable("editarCliente/{telefono}") { backStackEntry ->
+                        val telefono = backStackEntry.arguments?.getString("telefono")?.toIntOrNull()
                         val clientes by clienteViewModel.clientes.collectAsState()
-                        val cliente = clientes.find { it.id_cliente == id }
+                        val cliente = clientes.find { it.telefono == telefono }
 
                         if (cliente != null) {
                             EditarClienteScreen(
@@ -116,7 +123,7 @@ class MainActivity : ComponentActivity() {
                             onAddEmpleado = { navController.navigate("nuevoEmpleado") },
                             onSearchEmpleado = { navController.navigate("buscarEmpleado") },
                             onEditEmpleado = { empleado ->
-                                navController.navigate("editarEmpleado/${empleado.id_empleado}")
+                                navController.navigate("editarEmpleado/${empleado.curp}")
                             }
                         )
                     }
@@ -133,15 +140,15 @@ class MainActivity : ComponentActivity() {
                             viewModel = empleadoViewModel,
                             onBack = { navController.popBackStack() },
                             onEditEmpleado = { empleado ->
-                                navController.navigate("editarEmpleado/${empleado.id_empleado}")
+                                navController.navigate("editarEmpleado/${empleado.curp}")
                             }
                         )
                     }
 
-                    composable("editarEmpleado/{id}") { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+                    composable("editarEmpleado/{curp}") { backStackEntry ->
+                        val curp = backStackEntry.arguments?.getString("curp")
                         val empleados by empleadoViewModel.empleados.collectAsState()
-                        val empleado = empleados.find { it.id_empleado == id }
+                        val empleado = empleados.find { it.curp == curp }
 
                         if (empleado != null) {
                             EditarEmpleadoScreen(
@@ -156,15 +163,13 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-
-
                     // ✅ Cotizaciones
                     composable("cotizaciones") {
                         CotizacionScreen(
                             viewModel = cotizacionViewModel,
                             onBack = { navController.popBackStack() },
                             onAddCotizacion = { navController.navigate("nuevaCotizacion") },
-                            onSearchCotizacion = { /* lógica de búsqueda */ },
+                            onSearchCotizacion = { navController.navigate("buscarCotizacion") },
                             onEditCotizacion = { cotizacion ->
                                 navController.navigate("editarCotizacion/${cotizacion.id_cotizacion}")
                             }
@@ -177,7 +182,7 @@ class MainActivity : ComponentActivity() {
                             viewModel = ordenViewModel,
                             onBack = { navController.popBackStack() },
                             onAddOrden = { navController.navigate("nuevaOrden") },
-                            onSearchOrden = { /* lógica de búsqueda */ },
+                            onSearchOrden = { navController.navigate("buscarOrden") },
                             onEditOrden = { orden ->
                                 navController.navigate("editarOrden/${orden.id_orden}")
                             }
@@ -189,7 +194,7 @@ class MainActivity : ComponentActivity() {
                         LogsScreen(
                             viewModel = logViewModel,
                             onBack = { navController.popBackStack() },
-                            onSearchLog = { /* lógica de búsqueda de logs */ }
+                            onSearchLog = { navController.navigate("buscarLog") }
                         )
                     }
 
@@ -201,7 +206,7 @@ class MainActivity : ComponentActivity() {
                             dueñoActual = dueñoActual,
                             onBack = { navController.popBackStack() },
                             onAddDueño = { navController.navigate("nuevoDueño") },
-                            onSearchDueño = { /* lógica de búsqueda */ },
+                            onSearchDueño = { navController.navigate("buscarDueño") },
                             onEditDueño = { dueño ->
                                 navController.navigate("editarDueño/${dueño.id_dueño}")
                             }

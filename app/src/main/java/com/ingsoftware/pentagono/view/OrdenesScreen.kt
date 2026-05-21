@@ -17,6 +17,7 @@ import com.ingsoftware.pentagono.model.Orden
 import com.ingsoftware.pentagono.model.EstadoOrden
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.style.TextOverflow
 import com.ingsoftware.pentagono.data.OrdenEntity
 import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
 
@@ -63,24 +64,70 @@ fun OrdenesScreen(
                         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("ID: ${orden.id_orden}")
-                                Text("Cotización: ${orden.id_cotizacion}")
-                                Text("Empleado: ${orden.id_empleado}")
-                                Text("Dueño: ${orden.id_dueño}")
-                                Text("Inicio: ${orden.fecha_inicio}")
-                                Text("Fin: ${orden.fecha_fin ?: "N/A"}")
-                                Text("Estado: ${orden.estado}")
-                                Text("Entrega: ${orden.fecha_entrega ?: "N/A"}")
+                            Column(
+                                modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
+                            ) {
+                                Text(
+                                    "ID: ${orden.id_orden}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Cotización: ${orden.id_cotizacion}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Empleado: ${orden.id_empleado}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Dueño: ${orden.id_dueño}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Inicio: ${orden.fecha_inicio}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Fin: ${orden.fecha_fin ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Estado: ${orden.estado}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    "Entrega: ${orden.fecha_entrega ?: "N/A"}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
+
                             IconButton(onClick = { onEditOrden(orden) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Orden")
                             }
                         }
+
                     }
                 }
             }

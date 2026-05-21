@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.EmpleadoEntity
 import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
@@ -42,17 +43,15 @@ fun BuscarEmpleadoScreen(
             OutlinedTextField(
                 value = query,
                 onValueChange = {
-                    query = it
+                    query = it.trim() // ✅ limpieza de espacios
                     resultados = if (query.isBlank()) {
                         emptyList()
                     } else {
                         when {
-                            // Si es numérico, buscar por teléfono exacto
                             query.matches(Regex("^[0-9]+$")) -> {
                                 empleados.filter { it.telefono == query }
                             }
                             else -> {
-                                // Si es texto, buscar por CURP exacto o coincidencias en nombre/apellidos
                                 empleados.filter {
                                     it.curp.equals(query, ignoreCase = true) ||
                                             it.nombre.contains(query, ignoreCase = true) ||
@@ -86,12 +85,25 @@ fun BuscarEmpleadoScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text("CURP (PK): ${empleado.curp}", style = MaterialTheme.typography.bodySmall)
-                                Text("${empleado.nombre} ${empleado.apellidoPaterno} ${empleado.apellidoMaterno}", style = MaterialTheme.typography.titleMedium)
-                                Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Correo: ${empleado.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}", style = MaterialTheme.typography.bodyMedium)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("CURP (PK): ${empleado.curp}", style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+                                val nombreCompleto = listOfNotNull(
+                                    empleado.nombre.takeIf { it.isNotBlank() },
+                                    empleado.apellidoPaterno.takeIf { it.isNotBlank() },
+                                    empleado.apellidoMaterno.takeIf { it.isNotBlank() }
+                                ).joinToString(" ")
+
+                                Text(nombreCompleto, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+
+                                Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("Correo: ${empleado.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    "Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 3,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                             IconButton(onClick = { onEditEmpleado(empleado) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Empleado")

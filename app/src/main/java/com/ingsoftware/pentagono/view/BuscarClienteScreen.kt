@@ -91,7 +91,7 @@ fun BuscarClienteScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("Teléfono (PK): ${cliente.telefono}", style = MaterialTheme.typography.bodySmall)
+                                Text("Teléfono: ${cliente.telefono}", style = MaterialTheme.typography.bodySmall)
                                 Text("${cliente.nombre} ${cliente.apellidoPaterno} ${cliente.apellidoMaterno ?: ""}", style = MaterialTheme.typography.titleMedium)
                                 Text("Correo: ${cliente.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
                                 Text("Dirección: ${cliente.calle} #${cliente.numeroExterior}${cliente.numeroInterior?.let { " Int. $it" } ?: ""}, ${cliente.colonia}, ${cliente.municipio}, ${cliente.estado}", style = MaterialTheme.typography.bodyMedium)

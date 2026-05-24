@@ -21,7 +21,8 @@ import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
 fun BuscarDueñoScreen(
     viewModel: DueñoViewModel,
     onBack: () -> Unit = {},
-    onEditDueño: (DueñoEntity) -> Unit = {}
+    onEditDueño: (DueñoEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val dueños by viewModel.dueños.collectAsState()
     var query by remember { mutableStateOf("") }
@@ -30,7 +31,7 @@ fun BuscarDueñoScreen(
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Buscar Dueño", onMenuClick = { onBack() }) }
+        topBar = { PentagonoTopBar(title = "Buscar Dueño", onMenuClick = { onMenuClick() }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier

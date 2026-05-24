@@ -17,18 +17,22 @@ import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
 fun EditarDueñoScreen(
     viewModel: DueñoViewModel,
     dueño: DueñoEntity,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
     var nombre by remember { mutableStateOf(dueño.nombre) }
     var contraseña by remember { mutableStateOf(dueño.contraseña) }
 
-    var nombreError by remember { mutableStateOf(false) }
-    var contraseñaError by remember { mutableStateOf(false) }
+    // Validaciones
+    val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
+    val contraseñaValida = contraseña.isNotBlank() && contraseña.length >= 4
+
+    val hayErrores = !nombreValido || !contraseñaValida
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Editar Dueño", onMenuClick = { onBack() }) }
+        topBar = { PentagonoTopBar(title = "Editar Dueño", onMenuClick = { onMenuClick() }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -39,49 +43,53 @@ fun EditarDueñoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            OutlinedTextField(
+            CampoNombre(
                 value = nombre,
-                onValueChange = {
-                    nombre = it
-                    nombreError = !nombre.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Nombre") },
-                isError = nombreError,
-                modifier = Modifier.fillMaxWidth()
+                onValueChange = { nombre = it },
+                label = "Nombre",
+                obligatorio = true
             )
-            if (nombreError) Text("Solo letras permitidas", color = Color.Red)
 
             OutlinedTextField(
                 value = contraseña,
-                onValueChange = {
-                    contraseña = it
-                    contraseñaError = contraseña.length < 4
-                },
+                onValueChange = { contraseña = it },
                 label = { Text("Contraseña") },
-                isError = contraseñaError,
+                singleLine = true,
+                isError = !contraseñaValida,
                 modifier = Modifier.fillMaxWidth()
             )
-            if (contraseñaError) Text("Debe tener al menos 4 caracteres", color = Color.Red)
+            if (!contraseñaValida) {
+                if (contraseña.isBlank()) Text("Campo obligatorio", color = Color.Red)
+                else Text("Debe tener al menos 4 caracteres", color = Color.Red)
+            }
 
             Spacer(Modifier.height(24.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(onClick = {
-                    val cleanNombre = nombre.trim()
-                    val cleanContraseña = contraseña.trim()
-
-                    if (!nombreError && !contraseñaError && cleanNombre.isNotBlank() && cleanContraseña.isNotBlank()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = {
                         val dueñoEditado = dueño.copy(
-                            nombre = cleanNombre,
-                            contraseña = cleanContraseña
+                            nombre = nombre.trim(),
+                            contraseña = contraseña.trim()
                         )
                         viewModel.updateDueño(dueñoEditado)
                         onBack()
-                    }
-                }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
+                    },
+                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
                     Text("Aceptar")
                 }
-                OutlinedButton(onClick = { onBack() }) { Text("Cancelar") }
+                OutlinedButton(onClick = { onBack() }) {
+                    Text("Cancelar")
+                }
+            }
+
+            if (hayErrores) {
+                Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
             }
         }
     }

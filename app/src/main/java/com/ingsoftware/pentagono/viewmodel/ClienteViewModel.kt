@@ -9,42 +9,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ClienteViewModel(private val repository: ClienteRepository) : ViewModel() {
-
     private val _clientes = MutableStateFlow<List<ClienteEntity>>(emptyList())
     val clientes: StateFlow<List<ClienteEntity>> = _clientes
-
     init { loadClientes() }
-
     fun loadClientes() {
         viewModelScope.launch { _clientes.value = repository.getClientes() }
     }
-
     fun addCliente(cliente: ClienteEntity) {
         viewModelScope.launch {
             repository.addCliente(cliente)
             loadClientes()
         }
     }
-
     fun updateCliente(cliente: ClienteEntity) {
         viewModelScope.launch {
             repository.updateCliente(cliente)
             loadClientes()
         }
     }
-
     fun deleteCliente(cliente: ClienteEntity) {
         viewModelScope.launch {
             repository.deleteCliente(cliente)
             loadClientes()
         }
     }
-
-    // 🔎 Métodos de búsqueda
-    suspend fun findByTelefono(telefono: Int): List<ClienteEntity> {
-        return repository.findByTelefono(telefono)
-    }
-
+    suspend fun findByTelefono(telefono: String): ClienteEntity? = repository.findByTelefono(telefono)
     suspend fun findByNombre(nombre: String): List<ClienteEntity> {
         return repository.findByNombre(nombre)
     }

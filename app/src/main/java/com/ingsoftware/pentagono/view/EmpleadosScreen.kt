@@ -24,7 +24,8 @@ fun EmpleadosScreen(
     onBack: () -> Unit = {},
     onAddEmpleado: () -> Unit = {},
     onSearchEmpleado: () -> Unit = {},
-    onEditEmpleado: (EmpleadoEntity) -> Unit = {}
+    onEditEmpleado: (EmpleadoEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val empleados by viewModel.empleados.collectAsState()
 
@@ -34,7 +35,7 @@ fun EmpleadosScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Empleados",
-                onMenuClick = { onBack() }
+                onMenuClick = { onMenuClick() }
             )
         },
         bottomBar = {
@@ -78,7 +79,7 @@ fun EmpleadosScreen(
                                 modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
                             ) {
                                 Text(
-                                    "CURP (PK): ${empleado.curp}",
+                                    "CURP: ${empleado.curp}",
                                     style = MaterialTheme.typography.bodySmall,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis

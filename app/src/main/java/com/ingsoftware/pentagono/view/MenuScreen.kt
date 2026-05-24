@@ -1,4 +1,5 @@
 package com.ingsoftware.pentagono.view
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -13,9 +14,8 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuScreen(
-    dueñoId: Int,                          // ✅ nuevo parámetro
-    onNavigate: (String) -> Unit = {},
-    onBack: () -> Unit = {}
+    dueñoId: Int,
+    onNavigate: (String) -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -23,7 +23,7 @@ fun MenuScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Menú de Opciones",
-                onMenuClick = { onBack() }
+                onMenuClick = { /* ✅ No hace nada en MenuScreen */ }
             )
         }
     ) { innerPadding ->
@@ -36,25 +36,26 @@ fun MenuScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.End
         ) {
+
             MenuButton("Cotizaciones", Icons.Filled.Receipt, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("cotizaciones")
+                onNavigate("cotizaciones/$dueñoId")
             }
             MenuButton("Órdenes de trabajo", Icons.Filled.Work, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("ordenes")
+                onNavigate("ordenes/$dueñoId")
             }
             MenuButton("Clientes", Icons.Filled.People, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("clientes")
+                onNavigate("clientes/$dueñoId")
             }
             MenuButton("Empleados", Icons.Filled.Person, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("empleados")
+                onNavigate("empleados/$dueñoId")
             }
-            // ✅ ahora pasa el id del dueño autenticado
             MenuButton("Configuración", Icons.Filled.Settings, colorScheme.secondary, colorScheme.onPrimary) {
                 onNavigate("configuracion/$dueñoId")
             }
             MenuButton("Logs", Icons.Filled.List, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("logs")
+                onNavigate("logs/$dueñoId")
             }
+
 
             Spacer(Modifier.height(8.dp))
 
@@ -79,7 +80,7 @@ fun MenuScreen(
                 }
 
                 Button(
-                    onClick = { onNavigate("start/$dueñoId") }, // ✅ también pasa el id
+                    onClick = { onNavigate("start/$dueñoId") },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
@@ -97,7 +98,6 @@ fun MenuScreen(
         }
     }
 }
-
 
 @Composable
 fun MenuButton(

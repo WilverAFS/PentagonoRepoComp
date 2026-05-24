@@ -1,9 +1,6 @@
 package com.ingsoftware.pentagono.data
-
 import androidx.room.Database
 import androidx.room.RoomDatabase
-
-
 @Database(
     entities = [
         ClienteEntity::class,

@@ -24,13 +24,14 @@ fun ConfiguracionScreen(
     onBack: () -> Unit = {},
     onAddDueño: () -> Unit = {},
     onSearchDueño: () -> Unit = {},
-    onEditDueño: (DueñoEntity) -> Unit = {}
+    onEditDueño: (DueñoEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val dueños by viewModel.dueños.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Configuración", onMenuClick = { onBack() }) },
+        topBar = { PentagonoTopBar(title = "Configuración", onMenuClick = { onMenuClick() }) },
         bottomBar = {
             PentagonoBottomBar(
                 onSearchClick = { onSearchDueño() },

@@ -12,4 +12,6 @@ class CotizacionRepository(private val dao: CotizacionDao) {
     suspend fun findById(id: Int): CotizacionEntity? = dao.findById(id)
     suspend fun findByEstadoCotizacion(estado: String): List<CotizacionEntity> = dao.findByEstadoCotizacion(estado)
     suspend fun findByEstadoPago(estadoPago: String): List<CotizacionEntity> = dao.findByEstadoPago(estadoPago)
+    suspend fun findByCliente(idCliente: Int): List<CotizacionEntity> = dao.findByCliente(idCliente)
+    suspend fun findByConcepto(concepto: String): List<CotizacionEntity> = dao.findByConcepto(concepto)
 }

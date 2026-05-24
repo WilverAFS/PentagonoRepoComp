@@ -17,7 +17,8 @@ import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 fun EditarEmpleadoScreen(
     viewModel: EmpleadoViewModel,
     empleado: EmpleadoEntity,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -34,16 +35,24 @@ fun EditarEmpleadoScreen(
     var municipio by remember { mutableStateOf(empleado.municipio) }
     var estado by remember { mutableStateOf(empleado.estado) }
 
-    // Errores
-    var nombreError by remember { mutableStateOf(false) }
-    var apellidoPaternoError by remember { mutableStateOf(false) }
-    var apellidoMaternoError by remember { mutableStateOf(false) }
-    var telefonoError by remember { mutableStateOf(false) }
-    var numeroExteriorError by remember { mutableStateOf(false) }
-    var correoError by remember { mutableStateOf(false) }
+    // Validaciones
+    val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
+    val apellidoPaternoValido = apellidoPaterno.isNotBlank() && Validaciones.validarNombre(apellidoPaterno)
+    val apellidoMaternoValido = apellidoMaterno.isNotBlank() && Validaciones.validarNombre(apellidoMaterno)
+    val telefonoValido = Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", ""))
+    val correoValido = correo.isBlank() || Validaciones.validarCorreo(correo)
+    val calleValida = calle.isNotBlank()
+    val numeroExteriorValido = numeroExterior.isNotBlank() && Validaciones.validarNumero(numeroExterior)
+    val coloniaValida = colonia.isNotBlank()
+    val municipioValido = municipio.isNotBlank()
+    val estadoValido = estado.isNotBlank()
+
+    val hayErrores = !nombreValido || !apellidoPaternoValido || !apellidoMaternoValido ||
+            !telefonoValido || !correoValido || !calleValida || !numeroExteriorValido ||
+            !coloniaValida || !municipioValido || !estadoValido
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Editar Empleado", onMenuClick = { onBack() }) }
+        topBar = { PentagonoTopBar(title = "Editar Empleado", onMenuClick = { onMenuClick() }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -54,141 +63,66 @@ fun EditarEmpleadoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("CURP (PK): $curp", style = MaterialTheme.typography.bodyLarge)
+            Text("CURP: $curp", style = MaterialTheme.typography.bodyLarge)
 
-            // Nombre
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = {
-                    nombre = it
-                    nombreError = !nombre.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Nombre") },
-                isError = nombreError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (nombreError) Text("Solo se permiten letras", color = Color.Red)
+            CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
 
-            // Apellidos
-            OutlinedTextField(
-                value = apellidoPaterno,
-                onValueChange = {
-                    apellidoPaterno = it
-                    apellidoPaternoError = apellidoPaterno.isNotBlank() &&
-                            !apellidoPaterno.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Apellido Paterno") },
-                isError = apellidoPaternoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (apellidoPaternoError) Text("Solo se permiten letras", color = Color.Red)
+            CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno", obligatorio = true)
+
+            CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno", obligatorio = true)
+
+            CampoTelefono(telefono, { telefono = it }, obligatorio = true)
+
+            CampoCorreo(correo, { correo = it }, obligatorio = false)
+
+            CampoObligatorio(calle, { calle = it }, label = "Calle")
+
+            CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
-                value = apellidoMaterno,
-                onValueChange = {
-                    apellidoMaterno = it
-                    apellidoMaternoError = apellidoMaterno.isNotBlank() &&
-                            !apellidoMaterno.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Apellido Materno") },
-                isError = apellidoMaternoError,
+                value = numeroInterior,
+                onValueChange = { numeroInterior = it },
+                label = { Text("Número Interior (opcional)") },
                 modifier = Modifier.fillMaxWidth()
             )
-            if (apellidoMaternoError) Text("Solo se permiten letras", color = Color.Red)
 
-            // Teléfono
-            OutlinedTextField(
-                value = telefono,
-                onValueChange = {
-                    telefono = it
-                    val clean = telefono.replace(" ", "").replace("-", "")
-                    telefonoError = !(clean.matches(Regex("^[0-9]{10}$")))
-                },
-                label = { Text("Teléfono (10 dígitos)") },
-                isError = telefonoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (telefonoError) Text("Debe contener exactamente 10 dígitos", color = Color.Red)
+            CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
 
-            // Correo opcional
-            OutlinedTextField(
-                value = correo,
-                onValueChange = {
-                    correo = it
-                    correoError = correo.isNotBlank() &&
-                            !correo.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
-                },
-                label = { Text("Correo electrónico (opcional)") },
-                isError = correoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (correoError) Text("Formato de correo inválido", color = Color.Red)
+            CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
 
-            // Dirección
-            OutlinedTextField(value = calle, onValueChange = { calle = it }, label = { Text("Calle") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(
-                value = numeroExterior,
-                onValueChange = {
-                    numeroExterior = it
-                    numeroExteriorError = !numeroExterior.matches(Regex("^[0-9]+$"))
-                },
-                label = { Text("Número Exterior") },
-                isError = numeroExteriorError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (numeroExteriorError) Text("Debe ser un número", color = Color.Red)
-
-            OutlinedTextField(value = numeroInterior, onValueChange = { numeroInterior = it }, label = { Text("Número Interior (opcional)") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = colonia, onValueChange = { colonia = it }, label = { Text("Colonia") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = municipio, onValueChange = { municipio = it }, label = { Text("Municipio") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = estado, onValueChange = { estado = it }, label = { Text("Estado") }, modifier = Modifier.fillMaxWidth())
+            CampoObligatorio(estado, { estado = it }, label = "Estado")
 
             Spacer(Modifier.height(24.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                 Button(
                     onClick = {
-                        val cleanNombre = nombre.trim()
-                        val cleanApellidoPaterno = apellidoPaterno.trim()
-                        val cleanApellidoMaterno = apellidoMaterno.trim()
-                        val cleanTelefono = telefono.replace(" ", "").replace("-", "").trim()
-                        val cleanCorreo = correo.trim()
-                        val cleanCalle = calle.trim()
-                        val cleanNumeroExterior = numeroExterior.trim()
-                        val cleanNumeroInterior = numeroInterior.trim()
-                        val cleanColonia = colonia.trim()
-                        val cleanMunicipio = municipio.trim()
-                        val cleanEstado = estado.trim()
-
-                        if (!nombreError && !apellidoPaternoError && !apellidoMaternoError &&
-                            !telefonoError && !numeroExteriorError && !correoError &&
-                            cleanNombre.isNotBlank() && cleanApellidoPaterno.isNotBlank() && cleanApellidoMaterno.isNotBlank() &&
-                            cleanTelefono.isNotBlank() && cleanCalle.isNotBlank() &&
-                            cleanNumeroExterior.isNotBlank() && cleanColonia.isNotBlank() &&
-                            cleanMunicipio.isNotBlank() && cleanEstado.isNotBlank()
-                        ) {
-                            val empleadoEditado = empleado.copy(
-                                nombre = cleanNombre,
-                                apellidoPaterno = cleanApellidoPaterno,
-                                apellidoMaterno = cleanApellidoMaterno,
-                                telefono = cleanTelefono,
-                                correo = if (cleanCorreo.isBlank()) null else cleanCorreo,
-                                calle = cleanCalle,
-                                numeroExterior = cleanNumeroExterior.toInt(),
-                                numeroInterior = if (cleanNumeroInterior.isBlank()) null else cleanNumeroInterior,
-                                colonia = cleanColonia,
-                                municipio = cleanMunicipio,
-                                estado = cleanEstado
-                            )
-                            viewModel.updateEmpleado(empleadoEditado)
-                            onBack()
-                        }
+                        val empleadoEditado = empleado.copy(
+                            nombre = nombre.trim(),
+                            apellidoPaterno = apellidoPaterno.trim(),
+                            apellidoMaterno = apellidoMaterno.trim(),
+                            telefono = telefono.trim(),
+                            correo = if (correo.isBlank()) null else correo.trim(),
+                            calle = calle.trim(),
+                            numeroExterior = numeroExterior.trim().toInt(),
+                            numeroInterior = if (numeroInterior.isBlank()) null else numeroInterior.trim(),
+                            colonia = colonia.trim(),
+                            municipio = municipio.trim(),
+                            estado = estado.trim()
+                        )
+                        viewModel.updateEmpleado(empleadoEditado)
+                        onBack()
                     },
+                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")
                 }
                 OutlinedButton(onClick = { onBack() }) { Text("Cancelar") }
+            }
+
+            if (hayErrores) {
+                Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
             }
         }
     }

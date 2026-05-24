@@ -53,19 +53,3 @@ fun PentagonoTopBar(
         )
     )
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PentagonoTopBarPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        PentagonoTopBar()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PentagonoTopBarPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        PentagonoTopBar()
-    }
-}

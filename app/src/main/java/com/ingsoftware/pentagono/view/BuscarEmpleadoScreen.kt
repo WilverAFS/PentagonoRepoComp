@@ -21,7 +21,8 @@ import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 fun BuscarEmpleadoScreen(
     viewModel: EmpleadoViewModel,
     onBack: () -> Unit = {},
-    onEditEmpleado: (EmpleadoEntity) -> Unit = {}
+    onEditEmpleado: (EmpleadoEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val empleados by viewModel.empleados.collectAsState()
     var query by remember { mutableStateOf("") }
@@ -30,7 +31,7 @@ fun BuscarEmpleadoScreen(
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Buscar Empleado", onMenuClick = { onBack() }) }
+        topBar = { PentagonoTopBar(title = "Buscar Empleado", onMenuClick = { onMenuClick() }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -86,7 +87,7 @@ fun BuscarEmpleadoScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text("CURP (PK): ${empleado.curp}", style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("CURP: ${empleado.curp}", style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                                 val nombreCompleto = listOfNotNull(
                                     empleado.nombre.takeIf { it.isNotBlank() },

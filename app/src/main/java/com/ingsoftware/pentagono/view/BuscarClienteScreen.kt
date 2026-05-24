@@ -20,7 +20,8 @@ import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 fun BuscarClienteScreen(
     viewModel: ClienteViewModel,
     onBack: () -> Unit = {},
-    onEditCliente: (ClienteEntity) -> Unit = {}
+    onEditCliente: (ClienteEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val clientes by viewModel.clientes.collectAsState()
     var query by remember { mutableStateOf("") }
@@ -32,7 +33,7 @@ fun BuscarClienteScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Buscar Cliente",
-                onMenuClick = { onBack() }
+                onMenuClick = { onMenuClick() }
             )
         }
     ) { innerPadding ->
@@ -47,17 +48,21 @@ fun BuscarClienteScreen(
             OutlinedTextField(
                 value = query,
                 onValueChange = {
-                    query = it
+                    query = it.trim()
                     resultados = if (query.isBlank()) {
                         emptyList()
                     } else {
                         when {
-                            query.matches(Regex("^[0-9]+$")) -> {
-                                // Si es número, buscar por teléfono exacto
-                                clientes.filter { it.telefono == query.toInt() }
+                            query.matches(Regex("^\\d{10}$")) -> {
+                                // Teléfono exacto
+                                clientes.filter { it.telefono == query }
+                            }
+                            query.contains("@") -> {
+                                // Correo
+                                clientes.filter { (it.correo ?: "").contains(query, ignoreCase = true) }
                             }
                             else -> {
-                                // Si es texto, buscar coincidencias en nombre o apellidos
+                                // Nombre o apellidos
                                 clientes.filter {
                                     it.nombre.contains(query, ignoreCase = true) ||
                                             (it.apellidoPaterno?.contains(query, ignoreCase = true) ?: false) ||
@@ -67,7 +72,7 @@ fun BuscarClienteScreen(
                         }
                     }
                 },
-                label = { Text("Buscar por Teléfono o Nombre") },
+                label = { Text("Buscar por Teléfono, Nombre o Correo") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -92,9 +97,19 @@ fun BuscarClienteScreen(
                         ) {
                             Column {
                                 Text("Teléfono: ${cliente.telefono}", style = MaterialTheme.typography.bodySmall)
-                                Text("${cliente.nombre} ${cliente.apellidoPaterno} ${cliente.apellidoMaterno ?: ""}", style = MaterialTheme.typography.titleMedium)
+
+                                val nombreCompleto = listOfNotNull(
+                                    cliente.nombre.takeIf { it.isNotBlank() },
+                                    cliente.apellidoPaterno?.takeIf { it.isNotBlank() },
+                                    cliente.apellidoMaterno?.takeIf { it.isNotBlank() }
+                                ).joinToString(" ")
+
+                                Text(nombreCompleto, style = MaterialTheme.typography.titleMedium)
                                 Text("Correo: ${cliente.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
-                                Text("Dirección: ${cliente.calle} #${cliente.numeroExterior}${cliente.numeroInterior?.let { " Int. $it" } ?: ""}, ${cliente.colonia}, ${cliente.municipio}, ${cliente.estado}", style = MaterialTheme.typography.bodyMedium)
+                                Text(
+                                    "Dirección: ${cliente.calle} #${cliente.numeroExterior}${cliente.numeroInterior?.let { " Int. $it" } ?: ""}, ${cliente.colonia}, ${cliente.municipio}, ${cliente.estado}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
                             }
                             IconButton(onClick = { onEditCliente(cliente) }) {
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Cliente")

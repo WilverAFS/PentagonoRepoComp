@@ -17,35 +17,41 @@ import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 fun EditarClienteScreen(
     viewModel: ClienteViewModel,
     cliente: ClienteEntity,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    var telefono by remember { mutableStateOf(cliente.telefono.toString()) }
+    var telefono by remember { mutableStateOf(cliente.telefono) }
     var nombre by remember { mutableStateOf(cliente.nombre) }
     var apellidoPaterno by remember { mutableStateOf(cliente.apellidoPaterno ?: "") }
     var apellidoMaterno by remember { mutableStateOf(cliente.apellidoMaterno ?: "") }
     var calle by remember { mutableStateOf(cliente.calle) }
-    var numeroExterior by remember { mutableStateOf(cliente.numeroExterior.toString()) }
+    var numeroExterior by remember { mutableStateOf(cliente.numeroExterior) }
     var numeroInterior by remember { mutableStateOf(cliente.numeroInterior ?: "") }
     var colonia by remember { mutableStateOf(cliente.colonia) }
     var municipio by remember { mutableStateOf(cliente.municipio) }
     var estado by remember { mutableStateOf(cliente.estado) }
     var correo by remember { mutableStateOf(cliente.correo ?: "") }
 
-    // Errores
-    var telefonoError by remember { mutableStateOf(false) }
-    var nombreError by remember { mutableStateOf(false) }
-    var apellidoPaternoError by remember { mutableStateOf(false) }
-    var apellidoMaternoError by remember { mutableStateOf(false) }
-    var numeroExteriorError by remember { mutableStateOf(false) }
-    var correoError by remember { mutableStateOf(false) }
+    // Validaciones
+    val telefonoValido = Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", ""))
+    val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
+    val calleValida = calle.isNotBlank()
+    val numeroExteriorValido = numeroExterior.isNotBlank() && Validaciones.validarNumero(numeroExterior)
+    val coloniaValida = colonia.isNotBlank()
+    val municipioValido = municipio.isNotBlank()
+    val estadoValido = estado.isNotBlank()
+    val correoValido = correo.isBlank() || Validaciones.validarCorreo(correo)
+
+    val hayErrores = !telefonoValido || !nombreValido || !calleValida || !numeroExteriorValido ||
+            !coloniaValida || !municipioValido || !estadoValido || !correoValido
 
     Scaffold(
         topBar = {
             PentagonoTopBar(
                 title = "Editar Cliente",
-                onMenuClick = { onBack() }
+                onMenuClick = { onMenuClick() }
             )
         }
     ) { innerPadding ->
@@ -53,98 +59,37 @@ fun EditarClienteScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()) // ✅ scroll activado
+                .verticalScroll(rememberScrollState())
                 .background(colorScheme.background)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Teléfono (PK)
-            OutlinedTextField(
-                value = telefono,
-                onValueChange = {
-                    telefono = it
-                    val clean = telefono.replace(" ", "").replace("-", "")
-                    telefonoError = !(clean.matches(Regex("^[0-9]{10}$")))
-                },
-                label = { Text("Teléfono (10 dígitos)") },
-                isError = telefonoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (telefonoError) Text("Debe contener exactamente 10 dígitos", color = Color.Red)
+            CampoTelefono(telefono, { telefono = it }, obligatorio = true)
 
-            // Nombre
-            OutlinedTextField(
-                value = nombre,
-                onValueChange = {
-                    nombre = it
-                    nombreError = !it.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Nombre") },
-                isError = nombreError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (nombreError) Text("Solo se permiten letras", color = Color.Red)
+            CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
 
-            // Apellidos opcionales
-            OutlinedTextField(
-                value = apellidoPaterno,
-                onValueChange = {
-                    apellidoPaterno = it
-                    apellidoPaternoError = apellidoPaterno.isNotBlank() &&
-                            !apellidoPaterno.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Apellido Paterno (opcional)") },
-                isError = apellidoPaternoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (apellidoPaternoError) Text("Solo se permiten letras", color = Color.Red)
+            CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno (opcional)", obligatorio = false)
+
+            CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno (opcional)", obligatorio = false)
+
+            CampoObligatorio(calle, { calle = it }, label = "Calle")
+
+            CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
-                value = apellidoMaterno,
-                onValueChange = {
-                    apellidoMaterno = it
-                    apellidoMaternoError = apellidoMaterno.isNotBlank() &&
-                            !apellidoMaterno.matches(Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"))
-                },
-                label = { Text("Apellido Materno (opcional)") },
-                isError = apellidoMaternoError,
+                value = numeroInterior,
+                onValueChange = { numeroInterior = it },
+                label = { Text("Número Interior (opcional)") },
                 modifier = Modifier.fillMaxWidth()
             )
-            if (apellidoMaternoError) Text("Solo se permiten letras", color = Color.Red)
 
-            // Dirección
-            OutlinedTextField(value = calle, onValueChange = { calle = it }, label = { Text("Calle") }, modifier = Modifier.fillMaxWidth())
+            CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
 
-            OutlinedTextField(
-                value = numeroExterior,
-                onValueChange = {
-                    numeroExterior = it
-                    numeroExteriorError = !numeroExterior.matches(Regex("^[0-9]+$"))
-                },
-                label = { Text("Número Exterior") },
-                isError = numeroExteriorError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (numeroExteriorError) Text("Debe ser un número", color = Color.Red)
+            CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
 
-            OutlinedTextField(value = numeroInterior, onValueChange = { numeroInterior = it }, label = { Text("Número Interior (opcional)") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = colonia, onValueChange = { colonia = it }, label = { Text("Colonia") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = municipio, onValueChange = { municipio = it }, label = { Text("Municipio") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = estado, onValueChange = { estado = it }, label = { Text("Estado") }, modifier = Modifier.fillMaxWidth())
+            CampoObligatorio(estado, { estado = it }, label = "Estado")
 
-            // Correo opcional
-            OutlinedTextField(
-                value = correo,
-                onValueChange = {
-                    correo = it
-                    correoError = correo.isNotBlank() &&
-                            !correo.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"))
-                },
-                label = { Text("Correo electrónico (opcional)") },
-                isError = correoError,
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (correoError) Text("Formato de correo inválido", color = Color.Red)
+            CampoCorreo(correo, { correo = it }, obligatorio = false)
 
             Spacer(Modifier.height(24.dp))
 
@@ -154,40 +99,23 @@ fun EditarClienteScreen(
             ) {
                 Button(
                     onClick = {
-                        val cleanTelefono = telefono.replace(" ", "").replace("-", "").trim()
-                        val cleanNombre = nombre.trim()
-                        val cleanApellidoPaterno = apellidoPaterno.trim()
-                        val cleanApellidoMaterno = apellidoMaterno.trim()
-                        val cleanCalle = calle.trim()
-                        val cleanNumeroExterior = numeroExterior.trim()
-                        val cleanNumeroInterior = numeroInterior.trim()
-                        val cleanColonia = colonia.trim()
-                        val cleanMunicipio = municipio.trim()
-                        val cleanEstado = estado.trim()
-                        val cleanCorreo = correo.trim()
-
-                        if (!telefonoError && !nombreError && !numeroExteriorError && !correoError &&
-                            cleanTelefono.isNotBlank() && cleanNombre.isNotBlank() &&
-                            cleanCalle.isNotBlank() && cleanNumeroExterior.isNotBlank() &&
-                            cleanColonia.isNotBlank() && cleanMunicipio.isNotBlank() && cleanEstado.isNotBlank()
-                        ) {
-                            val clienteEditado = cliente.copy(
-                                telefono = cleanTelefono.toInt(),
-                                nombre = cleanNombre,
-                                apellidoPaterno = if (cleanApellidoPaterno.isBlank()) null else cleanApellidoPaterno,
-                                apellidoMaterno = if (cleanApellidoMaterno.isBlank()) null else cleanApellidoMaterno,
-                                calle = cleanCalle,
-                                numeroExterior = cleanNumeroExterior.toInt(),
-                                numeroInterior = if (cleanNumeroInterior.isBlank()) null else cleanNumeroInterior,
-                                colonia = cleanColonia,
-                                municipio = cleanMunicipio,
-                                estado = cleanEstado,
-                                correo = if (cleanCorreo.isBlank()) null else cleanCorreo
-                            )
-                            viewModel.updateCliente(clienteEditado)
-                            onBack()
-                        }
+                        val clienteEditado = cliente.copy(
+                            telefono = telefono.trim(),
+                            nombre = nombre.trim(),
+                            apellidoPaterno = if (apellidoPaterno.isBlank()) null else apellidoPaterno.trim(),
+                            apellidoMaterno = if (apellidoMaterno.isBlank()) null else apellidoMaterno.trim(),
+                            calle = calle.trim(),
+                            numeroExterior = numeroExterior.trim(),
+                            numeroInterior = if (numeroInterior.isBlank()) null else numeroInterior.trim(),
+                            colonia = colonia.trim(),
+                            municipio = municipio.trim(),
+                            estado = estado.trim(),
+                            correo = if (correo.isBlank()) null else correo.trim()
+                        )
+                        viewModel.updateCliente(clienteEditado)
+                        onBack()
                     },
+                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")
@@ -196,6 +124,10 @@ fun EditarClienteScreen(
                 OutlinedButton(onClick = { onBack() }) {
                     Text("Cancelar")
                 }
+            }
+
+            if (hayErrores) {
+                Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
             }
         }
     }

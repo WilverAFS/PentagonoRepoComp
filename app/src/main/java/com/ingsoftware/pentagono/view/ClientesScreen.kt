@@ -22,7 +22,8 @@ fun ClientesScreen(
     onBack: () -> Unit = {},
     onAddCliente: () -> Unit = {},
     onSearchCliente: () -> Unit = {},
-    onEditCliente: (ClienteEntity) -> Unit = {}
+    onEditCliente: (ClienteEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val clientes by viewModel.clientes.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
@@ -31,7 +32,7 @@ fun ClientesScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Clientes",
-                onMenuClick = { onBack() }
+                onMenuClick = { onMenuClick() }
             )
         },
         bottomBar = {
@@ -40,8 +41,6 @@ fun ClientesScreen(
                 onAddClick = { onAddCliente() }
             )
         }
-
-
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -64,9 +63,12 @@ fun ClientesScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(
-                            modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Text("Teléfono: ${cliente.telefono}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                "Teléfono: ${cliente.telefono}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
 
                             val nombreCompleto = listOfNotNull(
                                 cliente.nombre.takeIf { it.isNotBlank() },
@@ -77,11 +79,12 @@ fun ClientesScreen(
                             Text(
                                 nombreCompleto,
                                 style = MaterialTheme.typography.titleMedium,
-                                maxLines = 2, // ✅ permite salto de línea
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
                             )
 
-                            Text("Correo: ${cliente.correo ?: "-"}",
+                            Text(
+                                "Correo: ${cliente.correo ?: "-"}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis
@@ -90,7 +93,7 @@ fun ClientesScreen(
                             Text(
                                 "Dirección: ${cliente.calle} #${cliente.numeroExterior}${cliente.numeroInterior?.let { " Int. $it" } ?: ""}, ${cliente.colonia}, ${cliente.municipio}, ${cliente.estado}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                maxLines = 3, // ✅ dirección larga se parte en varias líneas
+                                maxLines = 3,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
@@ -99,7 +102,6 @@ fun ClientesScreen(
                             Icon(Icons.Filled.Edit, contentDescription = "Editar Cliente")
                         }
                     }
-
                 }
             }
         }

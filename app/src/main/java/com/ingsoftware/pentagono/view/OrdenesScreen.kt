@@ -24,14 +24,15 @@ fun OrdenesScreen(
     onBack: () -> Unit = {},
     onAddOrden: () -> Unit = {},
     onSearchOrden: () -> Unit = {},
-    onEditOrden: (OrdenEntity) -> Unit = {}
+    onEditOrden: (OrdenEntity) -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val ordenes by viewModel.ordenes.collectAsState()
 
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Órdenes de Trabajo", onMenuClick = { onBack() }) },
+        topBar = { PentagonoTopBar(title = "Órdenes de Trabajo", onMenuClick = { onMenuClick() }) },
         bottomBar = {
             PentagonoBottomBar(
                 onSearchClick = { onSearchOrden() },

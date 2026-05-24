@@ -17,14 +17,15 @@ import com.ingsoftware.pentagono.viewmodel.LogViewModel
 fun LogsScreen(
     viewModel: LogViewModel,
     onBack: () -> Unit = {},
-    onSearchLog: () -> Unit = {}
+    onSearchLog: () -> Unit = {},
+    onMenuClick: () -> Unit = {}
 ) {
     val logs by viewModel.logs.collectAsState()
 
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Logs del Sistema", onMenuClick = { onBack() }) },
+        topBar = { PentagonoTopBar(title = "Logs del Sistema", onMenuClick = { onMenuClick() }) },
         bottomBar = { PentagonoBottomBar(onSearchClick = { onSearchLog() }, onAddClick = { }) } // sin botón de añadir
     ) { innerPadding ->
         Column(

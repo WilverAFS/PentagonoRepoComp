@@ -43,5 +43,10 @@ class CotizacionViewModel(private val repository: CotizacionRepository) : ViewMo
     suspend fun findById(id: Int): CotizacionEntity? = repository.findById(id)
     suspend fun findByEstadoCotizacion(estado: String): List<CotizacionEntity> = repository.findByEstadoCotizacion(estado)
     suspend fun findByEstadoPago(estadoPago: String): List<CotizacionEntity> = repository.findByEstadoPago(estadoPago)
+    suspend fun findByCliente(idCliente: Int): List<CotizacionEntity> =
+        repository.findByCliente(idCliente)
+    suspend fun findByConcepto(concepto: String): List<CotizacionEntity> =
+        repository.findByConcepto(concepto)
+
 }
 

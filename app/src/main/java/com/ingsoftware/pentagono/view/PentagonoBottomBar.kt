@@ -8,6 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import com.ingsoftware.pentagono.ui.theme.PentagonoTheme
 
 @Composable
 fun PentagonoBottomBar(
@@ -18,17 +21,34 @@ fun PentagonoBottomBar(
 
     BottomAppBar(
         containerColor = colorScheme.surface,
-        contentColor = colorScheme.primary
+        contentColor = colorScheme.primary,
+        tonalElevation = 4.dp
     ) {
-
-        Spacer(Modifier.weight(1f)) // empuja los íconos a la derecha
+        Spacer(Modifier.weight(1f))
 
         IconButton(onClick = onSearchClick) {
-            Icon(Icons.Filled.Search, contentDescription = "Buscar Elemento")
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = "Buscar",
+                tint = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
         }
 
-        IconButton(onClick = onAddClick) {
-            Icon(Icons.Filled.Add, contentDescription = "Agregar Elemento")
+        FloatingActionButton(
+            onClick = onAddClick,
+            containerColor = colorScheme.secondary,
+            contentColor = colorScheme.onSecondary,
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 2.dp,
+                pressedElevation = 6.dp
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Agregar",
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
@@ -36,15 +56,11 @@ fun PentagonoBottomBar(
 @Preview(showBackground = true)
 @Composable
 fun PentagonoBottomBarPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        PentagonoBottomBar()
-    }
+    PentagonoTheme(darkTheme = false) { PentagonoBottomBar() }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PentagonoBottomBarPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        PentagonoBottomBar()
-    }
+    PentagonoTheme(darkTheme = true) { PentagonoBottomBar() }
 }

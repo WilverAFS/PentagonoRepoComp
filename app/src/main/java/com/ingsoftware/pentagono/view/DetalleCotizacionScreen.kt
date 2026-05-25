@@ -123,17 +123,17 @@ fun DetalleCotizacionScreen(
                 text = {
                     Text(
                         if (tipo == "cotizacion")
-                            "¿Está seguro de ${if (nuevoEstado == "aceptado") "aceptar" else "rechazar"} esta cotización? Esta acción es irreversible."
+                            "¿Está seguro de ${if (nuevoEstado == "aceptado") "aceptar" else "rechazar"} esta cotización? \n Esta acción es irreversible."
                         else
-                            "¿Está seguro de marcar el pago como $nuevoEstado? Esta acción es irreversible."
+                            "¿Está seguro de marcar el pago como $nuevoEstado? \n Esta acción es irreversible."
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = {
                         if (tipo == "cotizacion") {
                             if (nuevoEstado == "rechazado") {
-                                onUpdateEstadoCotizacion(cotizacion, "rechazado")
                                 onUpdateEstadoPago(cotizacion, "cancelado")
+                                onUpdateEstadoCotizacion(cotizacion, "rechazado")
                             } else {
                                 onUpdateEstadoCotizacion(cotizacion, "aceptado")
                             }

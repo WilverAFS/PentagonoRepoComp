@@ -86,6 +86,8 @@ class MainActivity : ComponentActivity() {
                         if (dueño != null) {
                             StartScreen(
                                 dueño = dueño,
+                                ordenVM = ordenVM,                  // ✅ se pasa el ViewModel de órdenes
+                                cotizacionVM = cotizacionVM,        // ✅ se pasa el ViewModel de cotizaciones
                                 onMenuClick = { navController.navigateIfNotCurrent("menu/${dueño.id_dueño}") },
                                 onExit = { finish() },
                                 onNavigateCotizaciones = { dueñoId ->
@@ -101,6 +103,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+
 
                     // 📌 MenuScreen
                     composable("menu/{id}") { backStackEntry ->

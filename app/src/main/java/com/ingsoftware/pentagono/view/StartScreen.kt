@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -16,17 +16,60 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import com.ingsoftware.pentagono.R
 import com.ingsoftware.pentagono.data.DueñoEntity
+import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
+import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartScreen(
-    dueño: DueñoEntity,              // ✅ recibe el dueño autenticado
+    dueño: DueñoEntity,
+    ordenVM: OrdenViewModel,
+    cotizacionVM: CotizacionViewModel,
     onMenuClick: (Int) -> Unit = {},
     onExit: () -> Unit = {},
-    onNavigateCotizaciones: (Int) -> Unit = {},   // ✅ nuevo callback
-    onNavigateOrdenes: (Int) -> Unit = {}         // ✅ nuevo callback
+    onNavigateCotizaciones: (Int) -> Unit = {},
+    onNavigateOrdenes: (Int) -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
+
+    // ✅ Obtener datos de BD
+    val ordenes by ordenVM.ordenes.collectAsState()
+    val cotizaciones by cotizacionVM.cotizaciones.collectAsState()
+
+    // ✅ Fecha actual
+    val fechaActual = LocalDate.now()
+
+    // ✅ Función segura para parsear fechas
+    fun safeParseDate(fecha: String?): LocalDate? {
+        return try {
+            if (fecha != null) LocalDate.parse(fecha) else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // ✅ Calcular métricas
+    val pendientes = ordenes.count {
+        it.estado.name == "PENDIENTE" &&
+                (safeParseDate(it.fecha_fin)?.isAfter(fechaActual) != false)
+    }
+
+    val porEntregar = ordenes.count {
+        it.estado.name == "TERMINADO" &&
+                (safeParseDate(it.fecha_fin)?.isAfter(fechaActual) != false)
+    }
+
+    val atrasadas = ordenes.count {
+        val fechaFin = safeParseDate(it.fecha_fin)
+        fechaFin != null &&
+                fechaFin.isBefore(fechaActual) &&
+                it.estado.name != "ENTREGADO" &&
+                it.estado.name != "CANCELADO"
+    }
+
+    val cotizacionesPendientes = cotizaciones.count { it.estado_cotizacion == "pendiente" }
+
     Scaffold(
         topBar = {
             PentagonoTopBar(
@@ -47,23 +90,17 @@ fun StartScreen(
                 text = "Bienvenido, ${dueño.nombre}",
                 style = MaterialTheme.typography.headlineSmall,
                 color = colorScheme.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
                 textAlign = TextAlign.Center
             )
 
             // ✅ Información del negocio
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
                 colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
@@ -78,31 +115,7 @@ fun StartScreen(
                 }
             }
 
-            // ✅ Servicios en cuadrícula 2x2
-            Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text("Servicios Disponibles:", style = MaterialTheme.typography.titleLarge, color= colorScheme.secondary)
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ServiceCard("Vidrio Arquitectónico", "Instalación de ventanales, fachadas y domos.", Modifier.weight(1f))
-                    ServiceCard("Diseño de Interiores", "Canceles de baño, espejos a medida y barandales de cristal templado.", Modifier.weight(1f))
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ServiceCard("Cortes Especializados", "Cristales con cortes precisos y acabados de alta calidad.", Modifier.weight(1f))
-                    ServiceCard("Mantenimiento y Reposición", "Cambio de cristales rotos o dañados.", Modifier.weight(1f))
-                }
-            }
-
-            // ✅ Dashboard en cuadrícula 2x2
+            // ✅ Dashboard dinámico
             Column(
                 modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -113,42 +126,31 @@ fun StartScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    DashboardCard(icon = R.drawable.ic_orders, title = "Órdenes activas", value = "3", Modifier.weight(1f))
-                    DashboardCard(icon = R.drawable.ic_order_pending, title = "Pendientes", value = "5", Modifier.weight(1f))
+                    DashboardCard(icon = R.drawable.ic_order_pending, title = "Pendientes", value = pendientes.toString(), Modifier.weight(1f))
+                    DashboardCard(icon = R.drawable.ic_orders, title = "Por Entregar", value = porEntregar.toString(), Modifier.weight(1f))
                 }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    DashboardCard(icon = R.drawable.ic_order_overdue, title = "Atrasadas", value = "2", Modifier.weight(1f), valueColor = Color.Black)
-                    DashboardCard(icon = R.drawable.ic_contract, title = "Cotizaciones", value = "4", Modifier.weight(1f))
+                    DashboardCard(icon = R.drawable.ic_order_overdue, title = "Atrasadas", value = atrasadas.toString(), Modifier.weight(1f), valueColor = Color.Red)
+                    DashboardCard(icon = R.drawable.ic_contract, title = "Cotizaciones Pendientes", value = cotizacionesPendientes.toString(), Modifier.weight(1f))
                 }
             }
 
             // ✅ Acceso rápido
             Row(
-                Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                Modifier.padding(16.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(
-                    onClick = { onExit() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
+                Button(onClick = { onExit() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Red)) {
                     Text("Salir", color = colorScheme.onPrimary)
                 }
-                Button(
-                    onClick = { onNavigateCotizaciones(dueño.id_dueño) },
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                ) {
+                Button(onClick = { onNavigateCotizaciones(dueño.id_dueño) }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
                     Text("Cotizaciones", color = colorScheme.onSecondary)
                 }
-                Button(
-                    onClick = { onNavigateOrdenes(dueño.id_dueño) },
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                ) {
+                Button(onClick = { onNavigateOrdenes(dueño.id_dueño) }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
                     Text("Órdenes", color = colorScheme.onSecondary)
                 }
             }
@@ -179,9 +181,7 @@ fun DashboardCard(icon: Int, title: String, value: String, modifier: Modifier = 
         colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

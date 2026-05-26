@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
                     clienteNavGraph(navController, clienteVM, cotizacionVM)
                     empleadoNavGraph(navController, empleadoVM)
                     cotizacionNavGraph(navController, cotizacionVM, clienteVM)
-                    ordenNavGraph(navController, ordenVM)
+                    ordenNavGraph(navController, ordenVM, empleadoVM)
                     dueñoNavGraph(navController, dueñoVM)
                     logNavGraph(navController, logVM)
                 }

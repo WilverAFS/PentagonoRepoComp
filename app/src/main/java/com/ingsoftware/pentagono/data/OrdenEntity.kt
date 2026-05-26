@@ -11,7 +11,7 @@ data class OrdenEntity(
     val id_empleado: Int,
     val id_dueño: Int,
     val fecha_inicio: String,
-    val fecha_fin: String?,
+    val fecha_fin: String?, //fecha acordada como de entrega con el cliente
     val estado: EstadoOrden,
-    val fecha_entrega: String?
+    val fecha_entrega: String? //fecha real en que se entrego
 )

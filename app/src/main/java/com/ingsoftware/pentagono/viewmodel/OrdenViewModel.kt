@@ -20,8 +20,14 @@ class OrdenViewModel(private val repository: OrdenRepository) : ViewModel() {
 
     fun addOrden(orden: OrdenEntity) {
         viewModelScope.launch {
-            repository.addOrden(orden)
-            loadOrdenes()
+            val existente = repository.findByCotizacion(orden.id_cotizacion)
+            if (existente.isNotEmpty()) {
+                // Ya existe una orden para esta cotización → evitar duplicados
+                println("Error: Ya existe una orden para la cotización ${orden.id_cotizacion}")
+            } else {
+                repository.addOrden(orden)
+                loadOrdenes()
+            }
         }
     }
 

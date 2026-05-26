@@ -34,7 +34,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
             onOpenCotizacion = { cotizacion ->
                 navController.navigate("detalleCotizacion/${cotizacion.id_cotizacion}/$dueñoId")
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
@@ -50,11 +50,15 @@ fun NavGraphBuilder.cotizacionNavGraph(
                 cotizacion = cotizacion,
                 onUpdateEstadoCotizacion = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_cotizacion = nuevoEstado))
+                    if (nuevoEstado.equals("aceptado", ignoreCase = true)) {
+                        // 🚀 Navegar a creación de orden
+                        navController.navigate("nuevaOrden/${c.id_cotizacion}/$dueñoId")
+                    }
                 },
                 onUpdateEstadoPago = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_pago = nuevoEstado))
                 },
-                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -62,7 +66,6 @@ fun NavGraphBuilder.cotizacionNavGraph(
             }
         }
     }
-
 
     // 📌 Nueva cotización
     composable("nuevaCotizacion/{dueñoId}") { backStackEntry ->
@@ -73,7 +76,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
             onBack = { navController.popBackStack() },
             onSaveSuccess = { navController.popBackStack() },
             onAddCliente = { telefono -> navController.navigate("nuevoCliente/$telefono/$dueñoId") },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
@@ -88,7 +91,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
             onBack = { navController.popBackStack() },
             onSaveSuccess = { navController.popBackStack() },
             onAddCliente = { tel -> navController.navigate("nuevoCliente/$tel/$dueñoId") },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
@@ -101,7 +104,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
             onOpenCotizacion = { cotizacion ->
                 navController.navigate("detalleCotizacion/${cotizacion.id_cotizacion}/$dueñoId")
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 }

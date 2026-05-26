@@ -12,14 +12,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ingsoftware.pentagono.navigateIfNotCurrent
 import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
+import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 import com.ingsoftware.pentagono.view.OrdenesScreen
-// import com.ingsoftware.pentagono.view.NuevaOrdenScreen
+import com.ingsoftware.pentagono.view.NuevaOrdenScreen
 // import com.ingsoftware.pentagono.view.BuscarOrdenScreen
 // import com.ingsoftware.pentagono.view.EditarOrdenScreen
 
 fun NavGraphBuilder.ordenNavGraph(
     navController: NavController,
-    ordenVM: OrdenViewModel
+    ordenVM: OrdenViewModel,
+    empleadoVM: EmpleadoViewModel
 ) {
     // 📌 Lista de órdenes
     composable("ordenes/{dueñoId}") { backStackEntry ->
@@ -27,26 +29,33 @@ fun NavGraphBuilder.ordenNavGraph(
         OrdenesScreen(
             viewModel = ordenVM,
             onBack = { navController.popBackStack() },
-            onAddOrden = { navController.navigate("nuevaOrden/$dueñoId") },   // 🔒 aún no implementado
+            onAddOrden = { navController.navigate("nuevaOrden/0/$dueñoId") },   // ejemplo, idCotizacion=0
             onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") }, // 🔒 aún no implementado
             onEditOrden = { orden ->
                 navController.navigate("editarOrden/${orden.id_orden}/$dueñoId") // 🔒 aún no implementado
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
-    // 📌 Nueva orden (comentado hasta que se implemente)
-    /*
-    composable("nuevaOrden/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+    // 📌 Nueva orden desde cotización aceptada
+    composable("nuevaOrden/{idCotizacion}/{dueñoId}") { backStackEntry ->
+        val idCotizacion = backStackEntry.arguments?.getString("idCotizacion")?.toIntOrNull() ?: 0
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
+
+        val empleados by empleadoVM.empleados.collectAsState()
+
         NuevaOrdenScreen(
-            viewModel = ordenVM,
+            idCotizacion = idCotizacion,
+            dueñoId = dueñoId,
+            empleados = empleados,
+            onSaveOrden = { orden ->
+                ordenVM.addOrden(orden)
+            },
             onBack = { navController.popBackStack() },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
-    */
 
     // 📌 Buscar orden (comentado hasta que se implemente)
     /*
@@ -58,7 +67,7 @@ fun NavGraphBuilder.ordenNavGraph(
             onEditOrden = { orden ->
                 navController.navigate("editarOrden/${orden.id_orden}/$dueñoId")
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
     */
@@ -76,7 +85,7 @@ fun NavGraphBuilder.ordenNavGraph(
                 viewModel = ordenVM,
                 orden = orden,
                 onBack = { navController.popBackStack() },
-                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

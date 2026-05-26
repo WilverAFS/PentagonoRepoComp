@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,7 +17,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun BuscarOrdenScreen(
     viewModel: OrdenViewModel,
-    onBack: () -> Unit = {},
     onOpenOrden: (OrdenEntity) -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
@@ -44,30 +41,30 @@ fun BuscarOrdenScreen(
         ) {
             OutlinedTextField(
                 value = idOrden,
-                onValueChange = { idOrden = it },
-                label = { Text("ID de Orden") },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(onClick = {
-                        scope.launch {
-                            val id = idOrden.toIntOrNull()
-                            if (id != null) {
-                                val orden = viewModel.findById(id)
-                                if (orden != null) {
-                                    resultado = orden
-                                    mensajeError = null
-                                } else {
-                                    resultado = null
-                                    mensajeError = "No se encontró ninguna orden con ID $id"
-                                }
+                onValueChange = { nuevoValor ->
+                    idOrden = nuevoValor
+                    scope.launch {
+                        val id = nuevoValor.toIntOrNull()
+                        if (id != null) {
+                            val orden = viewModel.findById(id)
+                            if (orden != null) {
+                                resultado = orden
+                                mensajeError = null
                             } else {
-                                mensajeError = "Ingrese un número válido"
+                                resultado = null
+                                mensajeError = "No se encontró ninguna orden con ID $id"
                             }
+                        } else if (nuevoValor.isNotEmpty()) {
+                            resultado = null
+                            mensajeError = "Ingrese un número válido"
+                        } else {
+                            resultado = null
+                            mensajeError = null
                         }
-                    }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Buscar")
                     }
-                }
+                },
+                label = { Text("ID de Orden") },
+                modifier = Modifier.fillMaxWidth()
             )
 
             if (mensajeError != null) {
@@ -99,9 +96,6 @@ fun BuscarOrdenScreen(
                     }
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = { onBack() }) { Text("Regresar") }
         }
     }
 }

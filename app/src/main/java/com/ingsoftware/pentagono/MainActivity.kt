@@ -87,8 +87,13 @@ class MainActivity : ComponentActivity() {
                             StartScreen(
                                 dueño = dueño,
                                 onMenuClick = { navController.navigateIfNotCurrent("menu/${dueño.id_dueño}") },
-                                onExit = { finish() }
-
+                                onExit = { finish() },
+                                onNavigateCotizaciones = { dueñoId ->
+                                    navController.navigateIfNotCurrent("cotizaciones/$dueñoId")
+                                },
+                                onNavigateOrdenes = { dueñoId ->
+                                    navController.navigateIfNotCurrent("ordenes/$dueñoId")
+                                }
                             )
                         } else {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

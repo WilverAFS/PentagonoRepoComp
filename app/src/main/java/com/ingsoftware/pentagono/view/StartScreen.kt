@@ -22,14 +22,16 @@ import com.ingsoftware.pentagono.data.DueñoEntity
 fun StartScreen(
     dueño: DueñoEntity,              // ✅ recibe el dueño autenticado
     onMenuClick: (Int) -> Unit = {},
-    onExit: () -> Unit = {}
+    onExit: () -> Unit = {},
+    onNavigateCotizaciones: (Int) -> Unit = {},   // ✅ nuevo callback
+    onNavigateOrdenes: (Int) -> Unit = {}         // ✅ nuevo callback
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Scaffold(
         topBar = {
             PentagonoTopBar(
                 title = "Vidrios y Cristales Pentágono",
-                onMenuClick = { onMenuClick (dueño.id_dueño) }
+                onMenuClick = { onMenuClick(dueño.id_dueño) }
             )
         }
     ) { innerPadding ->
@@ -50,6 +52,8 @@ fun StartScreen(
                     .padding(10.dp),
                 textAlign = TextAlign.Center
             )
+
+            // ✅ Información del negocio
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,7 +78,7 @@ fun StartScreen(
                 }
             }
 
-            // Servicios en cuadrícula 2x2
+            // ✅ Servicios en cuadrícula 2x2
             Column(
                 modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -98,7 +102,7 @@ fun StartScreen(
                 }
             }
 
-            // Dashboard en cuadrícula 2x2
+            // ✅ Dashboard en cuadrícula 2x2
             Column(
                 modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -122,7 +126,7 @@ fun StartScreen(
                 }
             }
 
-            // Acceso rápido
+            // ✅ Acceso rápido
             Row(
                 Modifier
                     .padding(16.dp)
@@ -130,21 +134,28 @@ fun StartScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = {onExit() }, //llamada a onExit
+                    onClick = { onExit() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
                     Text("Salir", color = colorScheme.onPrimary)
                 }
-                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
+                Button(
+                    onClick = { onNavigateCotizaciones(dueño.id_dueño) },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
                     Text("Cotizaciones", color = colorScheme.onSecondary)
                 }
-                Button(onClick = { }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)) {
+                Button(
+                    onClick = { onNavigateOrdenes(dueño.id_dueño) },
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
                     Text("Órdenes", color = colorScheme.onSecondary)
                 }
             }
         }
     }
 }
+
 @Composable
 fun ServiceCard(title: String, description: String, modifier: Modifier = Modifier) {
     val colorScheme = MaterialTheme.colorScheme
@@ -159,6 +170,7 @@ fun ServiceCard(title: String, description: String, modifier: Modifier = Modifie
         }
     }
 }
+
 @Composable
 fun DashboardCard(icon: Int, title: String, value: String, modifier: Modifier = Modifier, valueColor: Color = MaterialTheme.colorScheme.onSurface) {
     val colorScheme = MaterialTheme.colorScheme

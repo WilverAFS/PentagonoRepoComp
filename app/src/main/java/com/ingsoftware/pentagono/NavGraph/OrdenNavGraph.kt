@@ -28,8 +28,6 @@ fun NavGraphBuilder.ordenNavGraph(
         val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
         OrdenesScreen(
             viewModel = ordenVM,
-            onBack = { navController.popBackStack() },
-            //onAddOrden = { /* ✅ ya no navega, Snackbar se maneja en OrdenesScreen */ },
             onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") },
             onOpenOrden = { orden ->
                 navController.navigate("detalleOrden/${orden.id_orden}/$dueñoId")
@@ -54,12 +52,11 @@ fun NavGraphBuilder.ordenNavGraph(
         )
     }
 
-    // 📌 Buscar orden por ID
+    // 📌 Buscar orden por ID (sin botón de regresar)
     composable("buscarOrden/{dueñoId}") { backStackEntry ->
         val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
         BuscarOrdenScreen(
             viewModel = ordenVM,
-            onBack = { navController.popBackStack() },
             onOpenOrden = { orden ->
                 navController.navigate("detalleOrden/${orden.id_orden}/$dueñoId")
             },

@@ -30,9 +30,9 @@ fun NavGraphBuilder.empleadoNavGraph(
             onAddEmpleado = { navController.navigate("nuevoEmpleado/$dueñoId") },
             onSearchEmpleado = { navController.navigate("buscarEmpleado/$dueñoId") },
             onEditEmpleado = { empleado ->
-                navController.navigate("editarEmpleado/${empleado.curp}/$dueñoId")
+                navController.navigate("editarEmpleado/${empleado.id_empleado}/$dueñoId") // ✅ usar id_empleado
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
@@ -42,7 +42,7 @@ fun NavGraphBuilder.empleadoNavGraph(
         NuevoEmpleadoScreen(
             viewModel = empleadoVM,
             onBack = { navController.popBackStack() },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
@@ -53,25 +53,25 @@ fun NavGraphBuilder.empleadoNavGraph(
             viewModel = empleadoVM,
             onBack = { navController.popBackStack() },
             onEditEmpleado = { empleado ->
-                navController.navigate("editarEmpleado/${empleado.curp}/$dueñoId")
+                navController.navigate("editarEmpleado/${empleado.id_empleado}/$dueñoId") // ✅ usar id_empleado
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
     // 📌 Editar empleado
-    composable("editarEmpleado/{curp}/{dueñoId}") { backStackEntry ->
-        val curp = backStackEntry.arguments?.getString("curp")
+    composable("editarEmpleado/{id}/{dueñoId}") { backStackEntry ->
+        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
         val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
         val empleados by empleadoVM.empleados.collectAsState()
-        val empleado = empleados.find { it.curp == curp }
+        val empleado = empleados.find { it.id_empleado == id } // ✅ buscar por id_empleado
 
         if (empleado != null) {
             EditarEmpleadoScreen(
                 viewModel = empleadoVM,
                 empleado = empleado,
                 onBack = { navController.popBackStack() },
-                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

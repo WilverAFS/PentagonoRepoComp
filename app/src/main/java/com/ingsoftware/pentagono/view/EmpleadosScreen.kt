@@ -28,7 +28,6 @@ fun EmpleadosScreen(
     onMenuClick: () -> Unit = {}
 ) {
     val empleados by viewModel.empleados.collectAsState()
-
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -60,9 +59,7 @@ fun EmpleadosScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(empleados) { empleado ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -75,9 +72,13 @@ fun EmpleadosScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(
-                                modifier = Modifier.weight(1f) // ✅ ocupa todo el espacio disponible
-                            ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                // ✅ Mostrar id_empleado interno
+                                Text(
+                                    "ID: ${empleado.id_empleado}",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+
                                 Text(
                                     "CURP: ${empleado.curp}",
                                     style = MaterialTheme.typography.bodySmall,
@@ -94,28 +95,24 @@ fun EmpleadosScreen(
                                 Text(
                                     nombreCompleto,
                                     style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 2, // ✅ permite salto de línea
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                Text(
-                                    "Tel: ${empleado.telefono}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                Text(
-                                    "Correo: ${empleado.correo ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
                                 )
 
                                 Text(
+                                    "Tel: ${empleado.telefono}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+
+                                Text(
+                                    "Correo: ${empleado.correo ?: "-"}",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+
+                                Text(
                                     "Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 3, // ✅ dirección larga se parte en varias líneas
+                                    maxLines = 3,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
@@ -124,7 +121,6 @@ fun EmpleadosScreen(
                                 Icon(Icons.Filled.Edit, contentDescription = "Editar Empleado")
                             }
                         }
-
                     }
                 }
             }

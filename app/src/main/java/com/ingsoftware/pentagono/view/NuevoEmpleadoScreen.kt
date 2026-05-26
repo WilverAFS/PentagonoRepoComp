@@ -19,6 +19,7 @@ fun NuevoEmpleadoScreen(
     onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val empleados by viewModel.empleados.collectAsState() // ✅ lista actual de empleados
 
     var curp by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
@@ -33,8 +34,11 @@ fun NuevoEmpleadoScreen(
     var municipio by remember { mutableStateOf("") }
     var estado by remember { mutableStateOf("Oaxaca") }
 
-    // Validaciones
-    val curpValida = curp.isNotBlank() && Validaciones.validarCurp(curp)
+    // ✅ Validaciones
+    val curpValidaFormato = curp.isNotBlank() && Validaciones.validarCurp(curp)
+    val curpUnica = empleados.none { it.curp.equals(curp.trim(), ignoreCase = true) }
+    val curpValida = curpValidaFormato && curpUnica
+
     val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
     val apellidoPaternoValido = apellidoPaterno.isNotBlank() && Validaciones.validarNombre(apellidoPaterno)
     val apellidoMaternoValido = apellidoMaterno.isNotBlank() && Validaciones.validarNombre(apellidoMaterno)
@@ -62,20 +66,30 @@ fun NuevoEmpleadoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CampoCurp(curp, { curp = it }, obligatorio = true)
+            // ✅ Campo CURP con validación adicional de unicidad
+            val curpError = when {
+                curp.isBlank() -> "Campo obligatorio"
+                !Validaciones.validarCurp(curp) -> "CURP inválida, debe tener 18 caracteres alfanuméricos"
+                !curpUnica -> "Ya existe un empleado con esta CURP"
+                else -> null
+            }
+
+            OutlinedTextField(
+                value = curp,
+                onValueChange = { curp = it.uppercase() },
+                label = { Text("CURP (18 caracteres)") },
+                singleLine = true,
+                isError = curpError != null,
+                modifier = Modifier.fillMaxWidth()
+            )
+            curpError?.let { Text(it, color = colorScheme.error) }
 
             CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
-
             CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno", obligatorio = true)
-
             CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno", obligatorio = true)
-
             CampoTelefono(telefono, { telefono = it }, obligatorio = true)
-
             CampoCorreo(correo, { correo = it }, obligatorio = false)
-
             CampoObligatorio(calle, { calle = it }, label = "Calle")
-
             CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
@@ -86,9 +100,7 @@ fun NuevoEmpleadoScreen(
             )
 
             CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
-
             CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
-
             CampoObligatorio(estado, { estado = it }, label = "Estado")
 
             Spacer(Modifier.height(24.dp))
@@ -97,6 +109,7 @@ fun NuevoEmpleadoScreen(
                 Button(
                     onClick = {
                         val nuevoEmpleado = EmpleadoEntity(
+                            id_empleado = 0,
                             curp = curp.trim(),
                             nombre = nombre.trim(),
                             apellidoPaterno = apellidoPaterno.trim(),
@@ -113,7 +126,7 @@ fun NuevoEmpleadoScreen(
                         viewModel.addEmpleado(nuevoEmpleado)
                         onBack()
                     },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")

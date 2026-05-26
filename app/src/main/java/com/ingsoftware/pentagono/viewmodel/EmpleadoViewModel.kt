@@ -13,6 +13,10 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
     private val _empleados = MutableStateFlow<List<EmpleadoEntity>>(emptyList())
     val empleados: StateFlow<List<EmpleadoEntity>> = _empleados
 
+    // ✅ Nuevo StateFlow para errores
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     init { loadEmpleados() }
 
     fun loadEmpleados() {
@@ -21,8 +25,15 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
 
     fun addEmpleado(empleado: EmpleadoEntity) {
         viewModelScope.launch {
-            repository.addEmpleado(empleado)
-            loadEmpleados()
+            // ✅ Validar unicidad de CURP antes de insertar
+            val existente = repository.findByCurp(empleado.curp)
+            if (existente != null) {
+                _error.value = "Ya existe un empleado con la CURP proporcionada"
+            } else {
+                repository.addEmpleado(empleado)
+                loadEmpleados()
+                _error.value = null // limpiar error si todo salió bien
+            }
         }
     }
 
@@ -30,6 +41,7 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
         viewModelScope.launch {
             repository.updateEmpleado(empleado)
             loadEmpleados()
+            _error.value = null // limpiar error en caso de edición exitosa
         }
     }
 
@@ -37,6 +49,7 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
         viewModelScope.launch {
             repository.deleteEmpleado(empleado)
             loadEmpleados()
+            _error.value = null // limpiar error en caso de eliminación exitosa
         }
     }
 
@@ -53,4 +66,3 @@ class EmpleadoViewModel(private val repository: EmpleadoRepository) : ViewModel(
         return repository.findByTelefono(telefono)
     }
 }
-

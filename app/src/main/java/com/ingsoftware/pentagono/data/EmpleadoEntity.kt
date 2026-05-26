@@ -1,12 +1,17 @@
 package com.ingsoftware.pentagono.data
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-
-@Entity(tableName = "empleados")
+@Entity(
+    tableName = "empleados",
+    indices = [Index(value = ["curp"], unique = true)] // ✅ CURP única
+)
 data class EmpleadoEntity(
-    @PrimaryKey val curp: String, // PK
+    @PrimaryKey(autoGenerate = true) val id_empleado: Int = 0, // ✅ PK autogenerado
+    @ColumnInfo(name = "curp") val curp: String,               // CURP única
     @ColumnInfo(name = "nombre") val nombre: String,
     @ColumnInfo(name = "apellido_paterno") val apellidoPaterno: String,
     @ColumnInfo(name = "apellido_materno") val apellidoMaterno: String,

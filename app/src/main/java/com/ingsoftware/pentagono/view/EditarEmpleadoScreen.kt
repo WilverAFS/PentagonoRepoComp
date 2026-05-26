@@ -22,7 +22,7 @@ fun EditarEmpleadoScreen(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    var curp by remember { mutableStateOf(empleado.curp) }
+    // ✅ Campos editables
     var nombre by remember { mutableStateOf(empleado.nombre) }
     var apellidoPaterno by remember { mutableStateOf(empleado.apellidoPaterno) }
     var apellidoMaterno by remember { mutableStateOf(empleado.apellidoMaterno) }
@@ -35,7 +35,7 @@ fun EditarEmpleadoScreen(
     var municipio by remember { mutableStateOf(empleado.municipio) }
     var estado by remember { mutableStateOf(empleado.estado) }
 
-    // Validaciones
+    // ✅ Validaciones (igual que antes)
     val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
     val apellidoPaternoValido = apellidoPaterno.isNotBlank() && Validaciones.validarNombre(apellidoPaterno)
     val apellidoMaternoValido = apellidoMaterno.isNotBlank() && Validaciones.validarNombre(apellidoMaterno)
@@ -63,20 +63,17 @@ fun EditarEmpleadoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("CURP: $curp", style = MaterialTheme.typography.bodyLarge)
+            // ✅ Mostrar id_empleado y CURP como datos fijos
+            Text("ID Empleado: ${empleado.id_empleado}", style = MaterialTheme.typography.bodyLarge)
+            Text("CURP: ${empleado.curp}", style = MaterialTheme.typography.bodyLarge)
 
+            // ✅ Campos editables
             CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
-
             CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno", obligatorio = true)
-
             CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno", obligatorio = true)
-
             CampoTelefono(telefono, { telefono = it }, obligatorio = true)
-
             CampoCorreo(correo, { correo = it }, obligatorio = false)
-
             CampoObligatorio(calle, { calle = it }, label = "Calle")
-
             CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
@@ -87,9 +84,7 @@ fun EditarEmpleadoScreen(
             )
 
             CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
-
             CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
-
             CampoObligatorio(estado, { estado = it }, label = "Estado")
 
             Spacer(Modifier.height(24.dp))
@@ -113,7 +108,7 @@ fun EditarEmpleadoScreen(
                         viewModel.updateEmpleado(empleadoEditado)
                         onBack()
                     },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")

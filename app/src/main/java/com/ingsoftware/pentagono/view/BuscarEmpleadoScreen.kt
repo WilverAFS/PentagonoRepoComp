@@ -44,7 +44,7 @@ fun BuscarEmpleadoScreen(
             OutlinedTextField(
                 value = query,
                 onValueChange = {
-                    query = it.trim() // ✅ limpieza de espacios
+                    query = it.trim()
                     resultados = if (query.isBlank()) {
                         emptyList()
                     } else {
@@ -87,6 +87,8 @@ fun BuscarEmpleadoScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
+                                // ✅ Mostrar id_empleado y CURP
+                                Text("ID: ${empleado.id_empleado}", style = MaterialTheme.typography.bodySmall)
                                 Text("CURP: ${empleado.curp}", style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
 
                                 val nombreCompleto = listOfNotNull(
@@ -96,9 +98,8 @@ fun BuscarEmpleadoScreen(
                                 ).joinToString(" ")
 
                                 Text(nombreCompleto, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                                Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text("Correo: ${empleado.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text("Tel: ${empleado.telefono}", style = MaterialTheme.typography.bodyMedium)
+                                Text("Correo: ${empleado.correo ?: "-"}", style = MaterialTheme.typography.bodyMedium)
                                 Text(
                                     "Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}",
                                     style = MaterialTheme.typography.bodyMedium,

@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
         DueñoEntity::class,
         LogEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

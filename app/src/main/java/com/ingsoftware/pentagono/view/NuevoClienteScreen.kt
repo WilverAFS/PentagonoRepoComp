@@ -22,6 +22,7 @@ fun NuevoClienteScreen(
     prefilledTelefono: String = ""
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val clientes by viewModel.clientes.collectAsState() // ✅ lista actual de clientes
 
     var telefono by remember { mutableStateOf(prefilledTelefono) }
     var nombre by remember { mutableStateOf("") }
@@ -35,8 +36,11 @@ fun NuevoClienteScreen(
     var estado by remember { mutableStateOf("Oaxaca") }
     var correo by remember { mutableStateOf("") }
 
-    // Validaciones
-    val telefonoValido = Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", ""))
+    // ✅ Validaciones
+    val telefonoValidoFormato = Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", ""))
+    val telefonoUnico = clientes.none { it.telefono == telefono.trim() }
+    val telefonoValido = telefonoValidoFormato && telefonoUnico
+
     val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
     val calleValida = calle.isNotBlank()
     val numeroExteriorValido = numeroExterior.isNotBlank() && Validaciones.validarNumero(numeroExterior)
@@ -65,16 +69,28 @@ fun NuevoClienteScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CampoTelefono(telefono, { telefono = it }, obligatorio = true)
+            // ✅ Campo Teléfono con validación adicional de unicidad
+            val telefonoError = when {
+                telefono.isBlank() -> "Campo obligatorio"
+                !Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", "")) -> "Debe contener exactamente 10 dígitos"
+                !telefonoUnico -> "Ya existe un cliente con este teléfono"
+                else -> null
+            }
+
+            OutlinedTextField(
+                value = telefono,
+                onValueChange = { telefono = it },
+                label = { Text("Teléfono (10 dígitos)") },
+                singleLine = true,
+                isError = telefonoError != null,
+                modifier = Modifier.fillMaxWidth()
+            )
+            telefonoError?.let { Text(it, color = colorScheme.error) }
 
             CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
-
             CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno (opcional)", obligatorio = false)
-
             CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno (opcional)", obligatorio = false)
-
             CampoObligatorio(calle, { calle = it }, label = "Calle")
-
             CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
@@ -85,11 +101,8 @@ fun NuevoClienteScreen(
             )
 
             CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
-
             CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
-
             CampoObligatorio(estado, { estado = it }, label = "Estado")
-
             CampoCorreo(correo, { correo = it }, obligatorio = false)
 
             Spacer(Modifier.height(24.dp))
@@ -116,7 +129,7 @@ fun NuevoClienteScreen(
                         viewModel.addCliente(nuevoCliente)
                         onSaveSuccess()
                     },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")

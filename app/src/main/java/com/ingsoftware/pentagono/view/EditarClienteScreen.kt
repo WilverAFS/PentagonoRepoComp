@@ -7,7 +7,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.ClienteEntity
 import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
@@ -21,6 +20,7 @@ fun EditarClienteScreen(
     onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val clientes by viewModel.clientes.collectAsState()
 
     var telefono by remember { mutableStateOf(cliente.telefono) }
     var nombre by remember { mutableStateOf(cliente.nombre) }
@@ -33,6 +33,9 @@ fun EditarClienteScreen(
     var municipio by remember { mutableStateOf(cliente.municipio) }
     var estado by remember { mutableStateOf(cliente.estado) }
     var correo by remember { mutableStateOf(cliente.correo ?: "") }
+
+    var showDialog by remember { mutableStateOf(false) }
+    var clienteConflicto: ClienteEntity? by remember { mutableStateOf(null) }
 
     // Validaciones
     val telefonoValido = Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", ""))
@@ -65,15 +68,10 @@ fun EditarClienteScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             CampoTelefono(telefono, { telefono = it }, obligatorio = true)
-
             CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
-
             CampoNombre(apellidoPaterno, { apellidoPaterno = it }, label = "Apellido Paterno (opcional)", obligatorio = false)
-
             CampoNombre(apellidoMaterno, { apellidoMaterno = it }, label = "Apellido Materno (opcional)", obligatorio = false)
-
             CampoObligatorio(calle, { calle = it }, label = "Calle")
-
             CampoNumero(numeroExterior, { numeroExterior = it }, label = "Número Exterior", obligatorio = true)
 
             OutlinedTextField(
@@ -84,11 +82,8 @@ fun EditarClienteScreen(
             )
 
             CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
-
             CampoObligatorio(municipio, { municipio = it }, label = "Municipio")
-
             CampoObligatorio(estado, { estado = it }, label = "Estado")
-
             CampoCorreo(correo, { correo = it }, obligatorio = false)
 
             Spacer(Modifier.height(24.dp))
@@ -99,6 +94,59 @@ fun EditarClienteScreen(
             ) {
                 Button(
                     onClick = {
+                        val conflicto = clientes.find { it.telefono == telefono.trim() && it.id_cliente != cliente.id_cliente }
+                        if (conflicto != null) {
+                            clienteConflicto = conflicto
+                            showDialog = true
+                        } else {
+                            val clienteEditado = cliente.copy(
+                                telefono = telefono.trim(),
+                                nombre = nombre.trim(),
+                                apellidoPaterno = if (apellidoPaterno.isBlank()) null else apellidoPaterno.trim(),
+                                apellidoMaterno = if (apellidoMaterno.isBlank()) null else apellidoMaterno.trim(),
+                                calle = calle.trim(),
+                                numeroExterior = numeroExterior.trim(),
+                                numeroInterior = if (numeroInterior.isBlank()) null else numeroInterior.trim(),
+                                colonia = colonia.trim(),
+                                municipio = municipio.trim(),
+                                estado = estado.trim(),
+                                correo = if (correo.isBlank()) null else correo.trim()
+                            )
+                            viewModel.updateCliente(clienteEditado)
+                            onBack()
+                        }
+                    },
+                    enabled = !hayErrores,
+                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                ) {
+                    Text("Aceptar")
+                }
+
+                OutlinedButton(onClick = { onBack() }) {
+                    Text("Cancelar")
+                }
+            }
+
+            if (hayErrores) {
+                Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
+            }
+        }
+
+        // ✅ Diálogo de confirmación en caso de conflicto de teléfono
+        if (showDialog && clienteConflicto != null) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Teléfono duplicado") },
+                text = { Text("El teléfono ingresado ya está asociado a otro cliente. ¿Desea continuar? El teléfono del otro cliente quedará vacío.") },
+                confirmButton = {
+                    Button(onClick = {
+                        // ✅ primero limpiar el cliente conflicto
+                        clienteConflicto?.let {
+                            val conflictoEditado = it.copy(telefono = "")
+                            viewModel.updateCliente(conflictoEditado)
+                        }
+
+                        // ✅ luego guardar el cliente editado con el nuevo teléfono
                         val clienteEditado = cliente.copy(
                             telefono = telefono.trim(),
                             nombre = nombre.trim(),
@@ -113,22 +161,19 @@ fun EditarClienteScreen(
                             correo = if (correo.isBlank()) null else correo.trim()
                         )
                         viewModel.updateCliente(clienteEditado)
+
+                        showDialog = false
                         onBack()
-                    },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                ) {
-                    Text("Aceptar")
+                    }) {
+                        Text("Sí, continuar")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { showDialog = false }) {
+                        Text("Cancelar")
+                    }
                 }
-
-                OutlinedButton(onClick = { onBack() }) {
-                    Text("Cancelar")
-                }
-            }
-
-            if (hayErrores) {
-                Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
-            }
+            )
         }
     }
 }

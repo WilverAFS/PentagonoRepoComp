@@ -13,19 +13,22 @@ import androidx.navigation.compose.composable
 import com.ingsoftware.pentagono.navigateIfNotCurrent
 import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
 import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
+import com.ingsoftware.pentagono.viewmodel.LogViewModel
 import com.ingsoftware.pentagono.view.OrdenesScreen
 import com.ingsoftware.pentagono.view.NuevaOrdenScreen
 import com.ingsoftware.pentagono.view.DetalleOrdenScreen
-import com.ingsoftware.pentagono.view.BuscarOrdenScreen   // ✅ importamos la nueva vista
+import com.ingsoftware.pentagono.view.BuscarOrdenScreen
+import com.ingsoftware.pentagono.model.TipoLog
 
 fun NavGraphBuilder.ordenNavGraph(
     navController: NavController,
     ordenVM: OrdenViewModel,
-    empleadoVM: EmpleadoViewModel
+    empleadoVM: EmpleadoViewModel,
+    logVM: LogViewModel   // ✅ nuevo parámetro
 ) {
     // 📌 Lista de órdenes
     composable("ordenes/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         OrdenesScreen(
             viewModel = ordenVM,
             onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") },
@@ -46,15 +49,28 @@ fun NavGraphBuilder.ordenNavGraph(
             idCotizacion = idCotizacion,
             dueñoId = dueñoId,
             empleados = empleados,
-            onSaveOrden = { orden -> ordenVM.addOrden(orden) },
+            onSaveOrden = { orden ->
+                ordenVM.addOrden(orden)
+
+                // ✅ Registrar log de tipo ADD usando .value
+                val nueva = ordenVM.ordenes.value.lastOrNull()
+                if (nueva != null) {
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Orden creada ID=${nueva.id_orden} desde cotización $idCotizacion"
+                    )
+                }
+                navController.popBackStack()
+            },
             onBack = { navController.popBackStack() },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
-    // 📌 Buscar orden por ID (sin botón de regresar)
+    // 📌 Buscar orden por ID
     composable("buscarOrden/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         BuscarOrdenScreen(
             viewModel = ordenVM,
             onOpenOrden = { orden ->
@@ -67,7 +83,7 @@ fun NavGraphBuilder.ordenNavGraph(
     // 📌 Detalle de orden
     composable("detalleOrden/{id}/{dueñoId}") { backStackEntry ->
         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         val ordenes by ordenVM.ordenes.collectAsState()
         val orden = ordenes.find { it.id_orden == id }
 
@@ -76,6 +92,13 @@ fun NavGraphBuilder.ordenNavGraph(
                 orden = orden,
                 onUpdateEstado = { o, nuevoEstado ->
                     ordenVM.updateOrden(o.copy(estado = nuevoEstado))
+
+                    // ✅ Registrar log de tipo UPDATE
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.UPDATE,
+                        descripcion = "Orden ${o.id_orden} actualizada a estado $nuevoEstado"
+                    )
                 },
                 onBack = { navController.popBackStack() },
                 onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }

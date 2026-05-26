@@ -24,11 +24,11 @@ fun EditarDueñoScreen(
 
     var nombre by remember { mutableStateOf(dueño.nombre) }
     var contraseña by remember { mutableStateOf(dueño.contraseña) }
+    var errorMensaje by remember { mutableStateOf<String?>(null) }
 
     // Validaciones
     val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
     val contraseñaValida = contraseña.isNotBlank() && contraseña.length >= 4
-
     val hayErrores = !nombreValido || !contraseñaValida
 
     Scaffold(
@@ -71,14 +71,18 @@ fun EditarDueñoScreen(
             ) {
                 Button(
                     onClick = {
-                        val dueñoEditado = dueño.copy(
-                            nombre = nombre.trim(),
-                            contraseña = contraseña.trim()
-                        )
-                        viewModel.updateDueño(dueñoEditado)
-                        onBack()
+                        try {
+                            val dueñoEditado = dueño.copy(
+                                nombre = nombre.trim(),
+                                contraseña = contraseña.trim()
+                            )
+                            viewModel.updateDueño(dueñoEditado)
+                            onBack()
+                        } catch (e: Exception) {
+                            errorMensaje = "El nombre ya existe, elija otro"
+                        }
                     },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")
@@ -90,6 +94,10 @@ fun EditarDueñoScreen(
 
             if (hayErrores) {
                 Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
+            }
+
+            errorMensaje?.let {
+                Text(it, color = colorScheme.error)
             }
         }
     }

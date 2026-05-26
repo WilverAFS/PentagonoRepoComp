@@ -12,25 +12,28 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ingsoftware.pentagono.navigateIfNotCurrent
 import com.ingsoftware.pentagono.view.BuscarClienteScreen
+import com.ingsoftware.pentagono.view.ClientesScreen
+import com.ingsoftware.pentagono.view.EditarClienteScreen
+import com.ingsoftware.pentagono.view.NuevoClienteScreen
 import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
-import com.ingsoftware.pentagono.view.ClientesScreen
-import com.ingsoftware.pentagono.view.NuevoClienteScreen
-import com.ingsoftware.pentagono.view.EditarClienteScreen
+import com.ingsoftware.pentagono.viewmodel.LogViewModel
+import com.ingsoftware.pentagono.model.TipoLog
 
 fun NavGraphBuilder.clienteNavGraph(
     navController: NavController,
     clienteVM: ClienteViewModel,
-    cotizacionVM: CotizacionViewModel
+    cotizacionVM: CotizacionViewModel,
+    logVM: LogViewModel   // ✅ nuevo parámetro
 ) {
     // 📌 Lista de clientes
     composable("clientes/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         ClientesScreen(
             viewModel = clienteVM,
             onBack = { navController.popBackStack() },
             onAddCliente = { navController.navigate("nuevoCliente/$dueñoId") },
-            onSearchCliente = { navController.navigate("buscarCliente/$dueñoId") }, // ✅ ruta corregida
+            onSearchCliente = { navController.navigate("buscarCliente/$dueñoId") },
             onEditCliente = { cliente -> navController.navigate("editarCliente/${cliente.telefono}/$dueñoId") },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
@@ -38,24 +41,35 @@ fun NavGraphBuilder.clienteNavGraph(
 
     // 📌 Buscar cliente
     composable("buscarCliente/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         BuscarClienteScreen(
             viewModel = clienteVM,
             onBack = { navController.popBackStack() },
             onEditCliente = { cliente ->
                 navController.navigate("editarCliente/${cliente.telefono}/$dueñoId")
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
     // 📌 Nuevo cliente
     composable("nuevoCliente/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevoClienteScreen(
             viewModel = clienteVM,
             onBack = { navController.popBackStack() },
-            onSaveSuccess = { navController.popBackStack() },
+            onSaveSuccess = {
+                // ✅ Registrar log de tipo ADD usando .value
+                val nuevo = clienteVM.clientes.value.lastOrNull()
+                if (nuevo != null) {
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Cliente agregado: ${nuevo.nombre} (Tel: ${nuevo.telefono})"
+                    )
+                }
+                navController.popBackStack()
+            },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
@@ -63,12 +77,21 @@ fun NavGraphBuilder.clienteNavGraph(
     // 📌 Nuevo cliente con teléfono prellenado
     composable("nuevoCliente/{telefono}/{dueñoId}") { backStackEntry ->
         val telefono = backStackEntry.arguments?.getString("telefono") ?: ""
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevoClienteScreen(
             viewModel = clienteVM,
             prefilledTelefono = telefono,
             onBack = { navController.popBackStack() },
             onSaveSuccess = {
+                // ✅ Registrar log de tipo ADD usando .value
+                val nuevo = clienteVM.clientes.value.lastOrNull()
+                if (nuevo != null) {
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Cliente agregado: ${nuevo.nombre} (Tel: ${nuevo.telefono})"
+                    )
+                }
                 navController.navigate("nuevaCotizacion?telefono=$telefono/$dueñoId") {
                     popUpTo("nuevoCliente/$telefono/$dueñoId") { inclusive = true }
                 }
@@ -80,7 +103,7 @@ fun NavGraphBuilder.clienteNavGraph(
     // 📌 Editar cliente
     composable("editarCliente/{telefono}/{dueñoId}") { backStackEntry ->
         val telefono = backStackEntry.arguments?.getString("telefono") ?: ""
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         val clientes by clienteVM.clientes.collectAsState()
         val cliente = clientes.find { it.telefono == telefono }
 
@@ -88,7 +111,15 @@ fun NavGraphBuilder.clienteNavGraph(
             EditarClienteScreen(
                 viewModel = clienteVM,
                 cliente = cliente,
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    // ✅ Registrar log de tipo UPDATE
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.UPDATE,
+                        descripcion = "Cliente actualizado: ${cliente.nombre} (Tel: ${cliente.telefono})"
+                    )
+                    navController.popBackStack()
+                },
                 onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {

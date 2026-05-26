@@ -18,7 +18,6 @@ fun NavGraphBuilder.logNavGraph(
         LogsScreen(
             viewModel = logVM,
             onBack = { navController.popBackStack() },
-            onSearchLog = { navController.navigate("buscarLog/$dueñoId") }, // 🔒 aún no implementado
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
         )
     }

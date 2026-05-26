@@ -23,7 +23,7 @@ fun NuevaCotizacionScreen(
     onBack: () -> Unit = {},
     onSaveSuccess: () -> Unit = {},
     onAddCliente: (String) -> Unit = {},
-    onMenuClick: () -> Unit = {},   // ✅ nuevo parámetro para consistencia
+    onMenuClick: () -> Unit = {},
     prefilledTelefono: String = ""
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -48,7 +48,7 @@ fun NuevaCotizacionScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Nueva Cotización",
-                onMenuClick = { onMenuClick() } // ✅ menú → MenuScreen
+                onMenuClick = { onMenuClick() }
             )
         }
     ) { innerPadding ->
@@ -61,7 +61,6 @@ fun NuevaCotizacionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Botón atrás dentro del contenido (si lo quieres mantener)
             Button(
                 onClick = { onBack() },
                 colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)

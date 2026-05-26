@@ -16,10 +16,9 @@ class DueñoViewModel(private val repository: DueñoRepository) : ViewModel() {
         viewModelScope.launch {
             val lista = repository.getDueños()
             if (lista.isEmpty()) {
-                // ✅ Insertar dueño administrador por defecto
+                // ✅ Insertar dueño administrador por defecto con ID autoincremental
                 repository.addDueño(
                     DueñoEntity(
-                        id_dueño = -1,
                         nombre = "admin",
                         contraseña = "admin"
                     )

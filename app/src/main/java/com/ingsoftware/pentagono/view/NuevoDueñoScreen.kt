@@ -21,16 +21,14 @@ fun NuevoDueñoScreen(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    var idDueño by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
     var contraseña by remember { mutableStateOf("") }
+    var errorMensaje by remember { mutableStateOf<String?>(null) }
 
     // Validaciones
-    val idValido = idDueño.isNotBlank()
     val nombreValido = nombre.isNotBlank() && Validaciones.validarNombre(nombre)
     val contraseñaValida = contraseña.isNotBlank() && contraseña.length >= 4
-
-    val hayErrores = !idValido || !nombreValido || !contraseñaValida
+    val hayErrores = !nombreValido || !contraseñaValida
 
     Scaffold(
         topBar = { PentagonoTopBar(title = "Nuevo Dueño", onMenuClick = { onMenuClick() }) }
@@ -44,8 +42,6 @@ fun NuevoDueñoScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CampoObligatorio(idDueño, { idDueño = it }, label = "ID Dueño")
-
             CampoNombre(nombre, { nombre = it }, label = "Nombre", obligatorio = true)
 
             OutlinedTextField(
@@ -69,15 +65,18 @@ fun NuevoDueñoScreen(
             ) {
                 Button(
                     onClick = {
-                        val nuevoDueño = DueñoEntity(
-                            id_dueño = idDueño.trim().toInt(),
-                            nombre = nombre.trim(),
-                            contraseña = contraseña.trim()
-                        )
-                        viewModel.addDueño(nuevoDueño)
-                        onBack()
+                        try {
+                            val nuevoDueño = DueñoEntity(
+                                nombre = nombre.trim(),
+                                contraseña = contraseña.trim()
+                            )
+                            viewModel.addDueño(nuevoDueño)
+                            onBack()
+                        } catch (e: Exception) {
+                            errorMensaje = "El nombre ya existe, elija otro"
+                        }
                     },
-                    enabled = !hayErrores, // ✅ botón deshabilitado si hay errores
+                    enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
                     Text("Aceptar")
@@ -89,6 +88,10 @@ fun NuevoDueñoScreen(
 
             if (hayErrores) {
                 Text("Algunos campos están vacíos o tienen errores", color = colorScheme.error)
+            }
+
+            errorMensaje?.let {
+                Text(it, color = colorScheme.error)
             }
         }
     }

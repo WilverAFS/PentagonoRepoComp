@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                 val empleadoVM = EmpleadoViewModel(EmpleadoRepository(db.empleadoDao()))
                 val cotizacionVM = CotizacionViewModel(CotizacionRepository(db.cotizacionDao()))
                 val ordenVM = OrdenViewModel(OrdenRepository(db.ordenDao()))
-                val logVM = LogViewModel(LogRepository(db.logDao()))
+                val logVM = LogViewModel(LogRepository(db.logDao()))   // ✅ LogViewModel
                 val dueñoVM = DueñoViewModel(DueñoRepository(db.dueñoDao()))
 
                 NavHost(navController = navController, startDestination = "login") {
@@ -72,12 +72,18 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             viewModel = dueñoVM,
                             onLoginSuccess = { dueño ->
+                                // ✅ Registrar log de acceso
+                                logVM.registrarLog(
+                                    idDueño = dueño.id_dueño,
+                                    tipo = com.ingsoftware.pentagono.model.TipoLog.ACCESS,
+                                    descripcion = "Inicio de sesión exitoso"
+                                )
                                 navController.navigate("start/${dueño.id_dueño}")
                             }
                         )
                     }
 
-                    // 📌 StartScreen con logo y menú
+                    // 📌 StartScreen
                     composable("start/{id}") { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
                         val dueños by dueñoVM.dueños.collectAsState()
@@ -86,8 +92,8 @@ class MainActivity : ComponentActivity() {
                         if (dueño != null) {
                             StartScreen(
                                 dueño = dueño,
-                                ordenVM = ordenVM,                  // ✅ se pasa el ViewModel de órdenes
-                                cotizacionVM = cotizacionVM,        // ✅ se pasa el ViewModel de cotizaciones
+                                ordenVM = ordenVM,
+                                cotizacionVM = cotizacionVM,
                                 onMenuClick = { navController.navigateIfNotCurrent("menu/${dueño.id_dueño}") },
                                 onExit = { finish() },
                                 onNavigateCotizaciones = { dueñoId ->
@@ -104,7 +110,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-
                     // 📌 MenuScreen
                     composable("menu/{id}") { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
@@ -116,12 +121,12 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // 📌 Subgrafos CRUD
-                    clienteNavGraph(navController, clienteVM, cotizacionVM)
-                    empleadoNavGraph(navController, empleadoVM)
-                    cotizacionNavGraph(navController, cotizacionVM, clienteVM)
-                    ordenNavGraph(navController, ordenVM, empleadoVM)
-                    dueñoNavGraph(navController, dueñoVM)
+                    // 📌 Subgrafos CRUD con logVM
+                    clienteNavGraph(navController, clienteVM, cotizacionVM, logVM)
+                    empleadoNavGraph(navController, empleadoVM, logVM)
+                    cotizacionNavGraph(navController, cotizacionVM, clienteVM, logVM)
+                    ordenNavGraph(navController, ordenVM, empleadoVM, logVM)
+                    dueñoNavGraph(navController, dueñoVM, logVM)
                     logNavGraph(navController, logVM)
                 }
             }

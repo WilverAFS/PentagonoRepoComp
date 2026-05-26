@@ -12,14 +12,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ingsoftware.pentagono.navigateIfNotCurrent
 import com.ingsoftware.pentagono.viewmodel.DueñoViewModel
+import com.ingsoftware.pentagono.viewmodel.LogViewModel
 import com.ingsoftware.pentagono.view.BuscarDueñoScreen
 import com.ingsoftware.pentagono.view.NuevoDueñoScreen
 import com.ingsoftware.pentagono.view.EditarDueñoScreen
 import com.ingsoftware.pentagono.view.ConfiguracionScreen
+import com.ingsoftware.pentagono.model.TipoLog
 
 fun NavGraphBuilder.dueñoNavGraph(
     navController: NavController,
-    dueñoVM: DueñoViewModel
+    dueñoVM: DueñoViewModel,
+    logVM: LogViewModel   // ✅ nuevo parámetro
 ) {
     // 📌 Configuración del dueño autenticado
     composable("configuracion/{id}") { backStackEntry ->
@@ -35,7 +38,7 @@ fun NavGraphBuilder.dueñoNavGraph(
                 onAddDueño = { navController.navigate("nuevoDueño/$id") },
                 onSearchDueño = { navController.navigate("buscarDueño/$id") },
                 onEditDueño = { dueno -> navController.navigate("editarDueño/${dueno.id_dueño}/$id") },
-                onMenuClick = { navController.navigateIfNotCurrent("menu/$id") } // ✅ menú → MenuScreen
+                onMenuClick = { navController.navigateIfNotCurrent("menu/$id") }
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -53,24 +56,35 @@ fun NavGraphBuilder.dueñoNavGraph(
             onEditDueño = { dueño ->
                 navController.navigate("editarDueño/${dueño.id_dueño}/$id")
             },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$id") } // ✅ menú → MenuScreen
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$id") }
         )
     }
 
     // 📌 Nuevo dueño
     composable("nuevoDueño/{id}") { backStackEntry ->
-        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
+        val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: 0
         NuevoDueñoScreen(
             viewModel = dueñoVM,
-            onBack = { navController.popBackStack() },
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$id") } // ✅ menú → MenuScreen
+            onBack = {
+                // ✅ Registrar log de tipo ADD usando .value
+                val nuevo = dueñoVM.dueños.value.lastOrNull()
+                if (nuevo != null) {
+                    logVM.registrarLog(
+                        idDueño = id,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Dueño agregado: ${nuevo.nombre}"
+                    )
+                }
+                navController.popBackStack()
+            },
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$id") }
         )
     }
 
     // 📌 Editar dueño
     composable("editarDueño/{id}/{dueñoId}") { backStackEntry ->
         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull()
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         val dueños by dueñoVM.dueños.collectAsState()
         val dueño = dueños.find { it.id_dueño == id }
 
@@ -78,8 +92,16 @@ fun NavGraphBuilder.dueñoNavGraph(
             EditarDueñoScreen(
                 viewModel = dueñoVM,
                 dueño = dueño,
-                onBack = { navController.popBackStack() },
-                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") } // ✅ menú → MenuScreen
+                onBack = {
+                    // ✅ Registrar log de tipo UPDATE
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.UPDATE,
+                        descripcion = "Dueño actualizado: ${dueño.nombre}"
+                    )
+                    navController.popBackStack()
+                },
+                onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

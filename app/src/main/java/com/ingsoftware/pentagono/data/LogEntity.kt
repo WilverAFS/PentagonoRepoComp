@@ -6,7 +6,7 @@ import com.ingsoftware.pentagono.model.TipoLog
 
 @Entity(tableName = "logs")
 data class LogEntity(
-    @PrimaryKey val id_log: Int,
+    @PrimaryKey(autoGenerate = true) val id_log: Int = 0,   // ✅ autoincremental
     val id_dueño: Int,
     val tipo: TipoLog,
     val descripcion: String,

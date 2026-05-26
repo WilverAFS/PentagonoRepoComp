@@ -6,10 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.viewmodel.LogViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -17,36 +17,45 @@ import com.ingsoftware.pentagono.viewmodel.LogViewModel
 fun LogsScreen(
     viewModel: LogViewModel,
     onBack: () -> Unit = {},
-    onSearchLog: () -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
     val logs by viewModel.logs.collectAsState()
-
     val colorScheme = MaterialTheme.colorScheme
 
+    // ✅ Orden inverso: más recientes primero
+    val logsOrdenados = logs.sortedByDescending { it.id_log }
+
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Logs del Sistema", onMenuClick = { onMenuClick() }) },
-        bottomBar = { PentagonoBottomBar(onSearchClick = { onSearchLog() }, onAddClick = { }) } // sin botón de añadir
+        topBar = { PentagonoTopBar(title = "Logs del Sistema", onMenuClick = { onMenuClick() }) }
     ) { innerPadding ->
         Column(
-            modifier = Modifier.padding(innerPadding).fillMaxSize().background(colorScheme.background).padding(16.dp)
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(colorScheme.background)
+                .padding(16.dp)
         ) {
-            Text("Historial de Logs", style = MaterialTheme.typography.headlineMedium, color = colorScheme.primary)
+            Text(
+                "Historial de Logs",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colorScheme.primary
+            )
 
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(logs) { log ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(logsOrdenados) { log ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+                    ) {
                         Column(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            modifier = Modifier.padding(12.dp).fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text("ID: ${log.id_log}")
-                            Text("Dueño: ${log.id_dueño}")
-                            Text("Tipo: ${log.tipo}")
-                            Text("Descripción: ${log.descripcion}")
-                            Text("Fecha: ${log.fecha}")
+                            // ✅ Compacto, sin etiquetas
+                            Text("{#${log.id_log}, Dueño ${log.id_dueño}, ${log.fecha}}")
+                            Text("${log.tipo}: ${log.descripcion}")
                         }
                     }
                 }

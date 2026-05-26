@@ -16,10 +16,11 @@ import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 fun NuevoEmpleadoScreen(
     viewModel: EmpleadoViewModel,
     onBack: () -> Unit = {},
+    onSaveSuccess: () -> Unit = {},   // ✅ nuevo parámetro
     onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val empleados by viewModel.empleados.collectAsState() // ✅ lista actual de empleados
+    val empleados by viewModel.empleados.collectAsState()
 
     var curp by remember { mutableStateOf("") }
     var nombre by remember { mutableStateOf("") }
@@ -124,7 +125,7 @@ fun NuevoEmpleadoScreen(
                             estado = estado.trim()
                         )
                         viewModel.addEmpleado(nuevoEmpleado)
-                        onBack()
+                        onSaveSuccess()   // ✅ notificar al NavGraph
                     },
                     enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)

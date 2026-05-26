@@ -13,19 +13,22 @@ import androidx.navigation.compose.composable
 import com.ingsoftware.pentagono.navigateIfNotCurrent
 import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
+import com.ingsoftware.pentagono.viewmodel.LogViewModel
 import com.ingsoftware.pentagono.view.CotizacionScreen
 import com.ingsoftware.pentagono.view.NuevaCotizacionScreen
 import com.ingsoftware.pentagono.view.BuscarCotizacionScreen
 import com.ingsoftware.pentagono.view.DetalleCotizacionScreen
+import com.ingsoftware.pentagono.model.TipoLog
 
 fun NavGraphBuilder.cotizacionNavGraph(
     navController: NavController,
     cotizacionVM: CotizacionViewModel,
-    clienteVM: ClienteViewModel
+    clienteVM: ClienteViewModel,
+    logVM: LogViewModel   // ✅ sigue presente en el NavGraph
 ) {
     // 📌 Lista de cotizaciones
     composable("cotizaciones/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         CotizacionScreen(
             viewModel = cotizacionVM,
             onBack = { navController.popBackStack() },
@@ -41,7 +44,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
     // 📌 Detalle de cotización
     composable("detalleCotizacion/{id}/{dueñoId}") { backStackEntry ->
         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         val cotizaciones by cotizacionVM.cotizaciones.collectAsState()
         val cotizacion = cotizaciones.find { it.id_cotizacion == id }
 
@@ -50,13 +53,27 @@ fun NavGraphBuilder.cotizacionNavGraph(
                 cotizacion = cotizacion,
                 onUpdateEstadoCotizacion = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_cotizacion = nuevoEstado))
+
+                    // ✅ Registrar log de actualización
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.UPDATE,
+                        descripcion = "Cotización ${c.id_cotizacion} actualizada a estado $nuevoEstado"
+                    )
+
                     if (nuevoEstado.equals("aceptado", ignoreCase = true)) {
-                        // 🚀 Navegar a creación de orden
                         navController.navigate("nuevaOrden/${c.id_cotizacion}/$dueñoId")
                     }
                 },
                 onUpdateEstadoPago = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_pago = nuevoEstado))
+
+                    // ✅ Registrar log de actualización
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.UPDATE,
+                        descripcion = "Cotización ${c.id_cotizacion} pago actualizado a $nuevoEstado"
+                    )
                 },
                 onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
@@ -69,12 +86,23 @@ fun NavGraphBuilder.cotizacionNavGraph(
 
     // 📌 Nueva cotización
     composable("nuevaCotizacion/{dueñoId}") { backStackEntry ->
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevaCotizacionScreen(
             viewModel = cotizacionVM,
             clienteViewModel = clienteVM,
             onBack = { navController.popBackStack() },
-            onSaveSuccess = { navController.popBackStack() },
+            onSaveSuccess = {
+                // ✅ Registrar log de tipo ADD usando .value
+                val nueva = cotizacionVM.cotizaciones.value.lastOrNull()
+                if (nueva != null) {
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Cotización creada ID=${nueva.id_cotizacion} para cliente ${nueva.id_cliente}"
+                    )
+                }
+                navController.popBackStack()
+            },
             onAddCliente = { telefono -> navController.navigate("nuevoCliente/$telefono/$dueñoId") },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
@@ -83,13 +111,24 @@ fun NavGraphBuilder.cotizacionNavGraph(
     // 📌 Nueva cotización con teléfono prellenado
     composable("nuevaCotizacion?telefono={telefono}/{dueñoId}") { backStackEntry ->
         val telefono = backStackEntry.arguments?.getString("telefono") ?: ""
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevaCotizacionScreen(
             viewModel = cotizacionVM,
             clienteViewModel = clienteVM,
             prefilledTelefono = telefono,
             onBack = { navController.popBackStack() },
-            onSaveSuccess = { navController.popBackStack() },
+            onSaveSuccess = {
+                // ✅ Registrar log de tipo ADD usando .value
+                val nueva = cotizacionVM.cotizaciones.value.lastOrNull()
+                if (nueva != null) {
+                    logVM.registrarLog(
+                        idDueño = dueñoId,
+                        tipo = TipoLog.ADD,
+                        descripcion = "Cotización creada ID=${nueva.id_cotizacion} para cliente ${nueva.id_cliente}"
+                    )
+                }
+                navController.popBackStack()
+            },
             onAddCliente = { tel -> navController.navigate("nuevoCliente/$tel/$dueñoId") },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )

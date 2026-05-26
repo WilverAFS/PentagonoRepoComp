@@ -15,8 +15,8 @@ import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
 import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 import com.ingsoftware.pentagono.view.OrdenesScreen
 import com.ingsoftware.pentagono.view.NuevaOrdenScreen
-// import com.ingsoftware.pentagono.view.BuscarOrdenScreen
-// import com.ingsoftware.pentagono.view.EditarOrdenScreen
+import com.ingsoftware.pentagono.view.DetalleOrdenScreen
+import com.ingsoftware.pentagono.view.BuscarOrdenScreen   // ✅ importamos la nueva vista
 
 fun NavGraphBuilder.ordenNavGraph(
     navController: NavController,
@@ -29,10 +29,10 @@ fun NavGraphBuilder.ordenNavGraph(
         OrdenesScreen(
             viewModel = ordenVM,
             onBack = { navController.popBackStack() },
-            onAddOrden = { navController.navigate("nuevaOrden/0/$dueñoId") },   // ejemplo, idCotizacion=0
-            onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") }, // 🔒 aún no implementado
-            onEditOrden = { orden ->
-                navController.navigate("editarOrden/${orden.id_orden}/$dueñoId") // 🔒 aún no implementado
+            //onAddOrden = { /* ✅ ya no navega, Snackbar se maneja en OrdenesScreen */ },
+            onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") },
+            onOpenOrden = { orden ->
+                navController.navigate("detalleOrden/${orden.id_orden}/$dueñoId")
             },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
@@ -42,48 +42,44 @@ fun NavGraphBuilder.ordenNavGraph(
     composable("nuevaOrden/{idCotizacion}/{dueñoId}") { backStackEntry ->
         val idCotizacion = backStackEntry.arguments?.getString("idCotizacion")?.toIntOrNull() ?: 0
         val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
-
         val empleados by empleadoVM.empleados.collectAsState()
 
         NuevaOrdenScreen(
             idCotizacion = idCotizacion,
             dueñoId = dueñoId,
             empleados = empleados,
-            onSaveOrden = { orden ->
-                ordenVM.addOrden(orden)
-            },
+            onSaveOrden = { orden -> ordenVM.addOrden(orden) },
             onBack = { navController.popBackStack() },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 
-    // 📌 Buscar orden (comentado hasta que se implemente)
-    /*
+    // 📌 Buscar orden por ID
     composable("buscarOrden/{dueñoId}") { backStackEntry ->
         val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
         BuscarOrdenScreen(
             viewModel = ordenVM,
             onBack = { navController.popBackStack() },
-            onEditOrden = { orden ->
-                navController.navigate("editarOrden/${orden.id_orden}/$dueñoId")
+            onOpenOrden = { orden ->
+                navController.navigate("detalleOrden/${orden.id_orden}/$dueñoId")
             },
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
-    */
 
-    // 📌 Editar orden (comentado hasta que se implemente)
-    /*
-    composable("editarOrden/{id}/{dueñoId}") { backStackEntry ->
+    // 📌 Detalle de orden
+    composable("detalleOrden/{id}/{dueñoId}") { backStackEntry ->
         val id = backStackEntry.arguments?.getString("id")?.toIntOrNull()
         val dueñoId = backStackEntry.arguments?.getString("dueñoId") ?: ""
         val ordenes by ordenVM.ordenes.collectAsState()
         val orden = ordenes.find { it.id_orden == id }
 
         if (orden != null) {
-            EditarOrdenScreen(
-                viewModel = ordenVM,
+            DetalleOrdenScreen(
                 orden = orden,
+                onUpdateEstado = { o, nuevoEstado ->
+                    ordenVM.updateOrden(o.copy(estado = nuevoEstado))
+                },
                 onBack = { navController.popBackStack() },
                 onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
@@ -93,5 +89,4 @@ fun NavGraphBuilder.ordenNavGraph(
             }
         }
     }
-    */
 }

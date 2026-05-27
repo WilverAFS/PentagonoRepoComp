@@ -19,9 +19,8 @@ import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
 @Composable
 fun BuscarCotizacionScreen(
     viewModel: CotizacionViewModel,
-    onBack: () -> Unit = {},
     onOpenCotizacion: (CotizacionEntity) -> Unit = {},
-    onMenuClick: () -> Unit = {}   // ✅ nuevo parámetro para consistencia
+    onMenuClick: () -> Unit = {}   // ✅ solo estos callbacks
 ) {
     val cotizaciones by viewModel.cotizaciones.collectAsState()
     var query by remember { mutableStateOf("") }
@@ -33,7 +32,7 @@ fun BuscarCotizacionScreen(
         topBar = {
             PentagonoTopBar(
                 title = "Buscar Cotización",
-                onMenuClick = { onMenuClick() } // ✅ menú → MenuScreen
+                onMenuClick = { onMenuClick() }
             )
         }
     ) { innerPadding ->

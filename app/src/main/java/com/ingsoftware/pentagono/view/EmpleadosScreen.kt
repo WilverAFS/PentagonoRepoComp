@@ -51,6 +51,7 @@ fun EmpleadosScreen(
                 .background(colorScheme.background)
                 .padding(16.dp)
         ) {
+            /*
             Text(
                 "Listado de Empleados",
                 style = MaterialTheme.typography.headlineMedium,
@@ -59,6 +60,7 @@ fun EmpleadosScreen(
 
             Spacer(Modifier.height(16.dp))
 
+             */
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(empleados) { empleado ->
                     Card(

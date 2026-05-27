@@ -24,7 +24,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
     navController: NavController,
     cotizacionVM: CotizacionViewModel,
     clienteVM: ClienteViewModel,
-    logVM: LogViewModel   // ✅ sigue presente en el NavGraph
+    logVM: LogViewModel
 ) {
     // 📌 Lista de cotizaciones
     composable("cotizaciones/{dueñoId}") { backStackEntry ->
@@ -53,22 +53,17 @@ fun NavGraphBuilder.cotizacionNavGraph(
                 cotizacion = cotizacion,
                 onUpdateEstadoCotizacion = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_cotizacion = nuevoEstado))
-
-                    // ✅ Registrar log de actualización
                     logVM.registrarLog(
                         idDueño = dueñoId,
                         tipo = TipoLog.UPDATE,
                         descripcion = "Cotización ${c.id_cotizacion} actualizada a estado $nuevoEstado"
                     )
-
                     if (nuevoEstado.equals("aceptado", ignoreCase = true)) {
                         navController.navigate("nuevaOrden/${c.id_cotizacion}/$dueñoId")
                     }
                 },
                 onUpdateEstadoPago = { c, nuevoEstado ->
                     cotizacionVM.updateCotizacion(c.copy(estado_pago = nuevoEstado))
-
-                    // ✅ Registrar log de actualización
                     logVM.registrarLog(
                         idDueño = dueñoId,
                         tipo = TipoLog.UPDATE,
@@ -90,9 +85,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
         NuevaCotizacionScreen(
             viewModel = cotizacionVM,
             clienteViewModel = clienteVM,
-            onBack = { navController.popBackStack() },
             onSaveSuccess = {
-                // ✅ Registrar log de tipo ADD usando .value
                 val nueva = cotizacionVM.cotizaciones.value.lastOrNull()
                 if (nueva != null) {
                     logVM.registrarLog(
@@ -116,9 +109,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
             viewModel = cotizacionVM,
             clienteViewModel = clienteVM,
             prefilledTelefono = telefono,
-            onBack = { navController.popBackStack() },
             onSaveSuccess = {
-                // ✅ Registrar log de tipo ADD usando .value
                 val nueva = cotizacionVM.cotizaciones.value.lastOrNull()
                 if (nueva != null) {
                     logVM.registrarLog(

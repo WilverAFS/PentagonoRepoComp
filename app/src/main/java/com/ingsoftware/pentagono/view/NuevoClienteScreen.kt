@@ -4,11 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardOptions   // ✅ correcto para KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.ImeAction          // ✅ correcto
+import androidx.compose.ui.text.input.KeyboardType      // ✅ correcto
 import com.ingsoftware.pentagono.data.ClienteEntity
 import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 
@@ -22,7 +24,7 @@ fun NuevoClienteScreen(
     prefilledTelefono: String = ""
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val clientes by viewModel.clientes.collectAsState() // ✅ lista actual de clientes
+    val clientes by viewModel.clientes.collectAsState()
 
     var telefono by remember { mutableStateOf(prefilledTelefono) }
     var nombre by remember { mutableStateOf("") }
@@ -69,7 +71,7 @@ fun NuevoClienteScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ✅ Campo Teléfono con validación adicional de unicidad
+            // ✅ Campo Teléfono con teclado numérico y validación de unicidad
             val telefonoError = when {
                 telefono.isBlank() -> "Campo obligatorio"
                 !Validaciones.validarTelefono(telefono.replace(" ", "").replace("-", "")) -> "Debe contener exactamente 10 dígitos"
@@ -83,7 +85,11 @@ fun NuevoClienteScreen(
                 label = { Text("Teléfono (10 dígitos)") },
                 singleLine = true,
                 isError = telefonoError != null,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,   // ✅ teclado numérico
+                    imeAction = ImeAction.Next
+                )
             )
             telefonoError?.let { Text(it, color = colorScheme.error) }
 
@@ -97,7 +103,11 @@ fun NuevoClienteScreen(
                 value = numeroInterior,
                 onValueChange = { numeroInterior = it },
                 label = { Text("Número Interior (opcional)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,   // ✅ teclado numérico
+                    imeAction = ImeAction.Next
+                )
             )
 
             CampoObligatorio(colonia, { colonia = it }, label = "Colonia")
@@ -132,7 +142,7 @@ fun NuevoClienteScreen(
                     enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Aceptar")
+                    Text("Aceptar", color = colorScheme.onSecondary)
                 }
 
                 OutlinedButton(onClick = { onBack() }) {

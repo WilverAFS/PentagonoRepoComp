@@ -130,7 +130,7 @@ fun NuevaOrdenScreen(
                     enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Guardar Orden")
+                    Text("Guardar Orden", color = colorScheme.onSecondary)
                 }
                 OutlinedButton(onClick = { onBack() }) { Text("Cancelar") }
             }

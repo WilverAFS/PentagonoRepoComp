@@ -1,11 +1,14 @@
 package com.ingsoftware.pentagono.view
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions   // ✅ correcto para KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction           // ✅ correcto
+import androidx.compose.ui.text.input.KeyboardType       // ✅ correcto
 
 object Validaciones {
     val telefonoRegex = Regex("^\\d{10}$")
@@ -32,7 +35,11 @@ fun CampoTelefono(value: String, onValueChange: (String) -> Unit, obligatorio: B
         label = { Text("Teléfono (10 dígitos)") },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Phone,   // ✅ teclado numérico para teléfono
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -49,7 +56,11 @@ fun CampoCorreo(value: String, onValueChange: (String) -> Unit, obligatorio: Boo
         label = { Text("Correo electrónico") },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,   // ✅ teclado optimizado para correo
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -66,7 +77,11 @@ fun CampoNombre(value: String, onValueChange: (String) -> Unit, label: String = 
         label = { Text(label) },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -83,7 +98,11 @@ fun CampoNumero(value: String, onValueChange: (String) -> Unit, label: String, o
         label = { Text(label) },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,   // ✅ teclado numérico para números
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -100,7 +119,11 @@ fun CampoCurp(value: String, onValueChange: (String) -> Unit, obligatorio: Boole
         label = { Text("CURP (18 caracteres)") },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -117,7 +140,11 @@ fun CampoFecha(value: String, onValueChange: (String) -> Unit, label: String = "
         label = { Text(label) },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,   // ✅ teclado numérico para fechas
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) {
         if (obligatorio && value.isBlank()) Text("Campo obligatorio", color = Color.Red)
@@ -134,7 +161,11 @@ fun CampoObligatorio(value: String, onValueChange: (String) -> Unit, label: Stri
         label = { Text(label) },
         singleLine = true,
         isError = isError,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        )
     )
     if (isError) Text("Campo obligatorio", color = Color.Red)
 }

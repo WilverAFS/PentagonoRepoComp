@@ -100,7 +100,6 @@ fun NavGraphBuilder.ordenNavGraph(
                         descripcion = "Orden ${o.id_orden} actualizada a estado $nuevoEstado"
                     )
                 },
-                onBack = { navController.popBackStack() },
                 onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
             )
         } else {

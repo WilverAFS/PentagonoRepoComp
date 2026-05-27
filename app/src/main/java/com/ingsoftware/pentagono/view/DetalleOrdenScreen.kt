@@ -7,6 +7,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.OrdenEntity
 import com.ingsoftware.pentagono.model.EstadoOrden
@@ -20,7 +21,6 @@ import java.time.temporal.ChronoUnit
 fun DetalleOrdenScreen(
     orden: OrdenEntity,
     onUpdateEstado: (OrdenEntity, EstadoOrden) -> Unit,
-    onBack: () -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -39,8 +39,8 @@ fun DetalleOrdenScreen(
 
     val estadoColor = when (orden.estado) {
         EstadoOrden.PENDIENTE -> colorScheme.error
-        EstadoOrden.TERMINADO -> colorScheme.primary
-        EstadoOrden.ENTREGADO -> colorScheme.tertiary
+        EstadoOrden.TERMINADO -> colorScheme.secondary
+        EstadoOrden.ENTREGADO -> colorScheme.primary
         EstadoOrden.CANCELADO -> colorScheme.outline
     }
 
@@ -56,7 +56,6 @@ fun DetalleOrdenScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ✅ Mostrar contador de fechas solo si la orden no está cancelada ni entregada
             if (orden.estado != EstadoOrden.CANCELADO && orden.estado != EstadoOrden.ENTREGADO) {
                 Box(
                     modifier = Modifier
@@ -90,12 +89,13 @@ fun DetalleOrdenScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         Button(
                             onClick = { onUpdateEstado(orden.copy(estado = EstadoOrden.TERMINADO), EstadoOrden.TERMINADO) },
-                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.secondary)
                         ) { Text("Marcar como Terminado") }
 
                         OutlinedButton(
-                            onClick = { onUpdateEstado(orden.copy(estado = EstadoOrden.CANCELADO), EstadoOrden.CANCELADO) }
-                        ) { Text("Cancelar Orden") }
+                            onClick = { onUpdateEstado(orden.copy(estado = EstadoOrden.CANCELADO), EstadoOrden.CANCELADO) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) { Text("Cancelar Orden", color = Color.White ) }
                     }
                 }
                 EstadoOrden.TERMINADO -> {
@@ -110,30 +110,30 @@ fun DetalleOrdenScreen(
                                     EstadoOrden.ENTREGADO
                                 )
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.tertiary)
-                        ) { Text("Marcar como Entregado") }
+                            colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                        ) { Text("Marcar como Entregado", color = colorScheme.onSecondary) }
 
                         OutlinedButton(
-                            onClick = { onUpdateEstado(orden.copy(estado = EstadoOrden.CANCELADO), EstadoOrden.CANCELADO) }
-                        ) { Text("Cancelar Orden") }
+                            onClick = { onUpdateEstado(orden.copy(estado = EstadoOrden.CANCELADO), EstadoOrden.CANCELADO) },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) { Text("Cancelar Orden", color = Color.White) }
                     }
                 }
                 EstadoOrden.ENTREGADO -> {
-                    // ✅ Comparación entre fecha de entrega y fecha fin acordada
                     if (orden.fecha_entrega != null && fechaFin != null) {
                         val fechaEntrega = LocalDate.parse(orden.fecha_entrega, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                         val diferencia = ChronoUnit.DAYS.between(fechaEntrega, fechaFin).toInt()
 
                         val mensajeEntrega: String
-                        val colorEntrega: androidx.compose.ui.graphics.Color
+                        val colorEntrega: Color
 
                         if (diferencia >= 0) {
                             mensajeEntrega = if (diferencia == 0) "Orden entregada en la fecha acordada"
                             else "Orden entregada con ${diferencia} días de anticipación"
-                            colorEntrega = colorScheme.primary // verde
+                            colorEntrega = colorScheme.primary
                         } else {
                             mensajeEntrega = "Orden entregada con ${-diferencia} días de atraso"
-                            colorEntrega = colorScheme.outline // gris
+                            colorEntrega = colorScheme.outline
                         }
 
                         Box(
@@ -142,17 +142,14 @@ fun DetalleOrdenScreen(
                                 .background(colorEntrega)
                                 .padding(12.dp)
                         ) {
-                            Text(mensajeEntrega, style = MaterialTheme.typography.bodyLarge)
+                            Text(mensajeEntrega, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
                         }
                     }
                 }
                 EstadoOrden.CANCELADO -> {
-                    // ✅ No se muestran botones ni contador de fechas
+                    // No se muestran botones ni contador de fechas
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
-            OutlinedButton(onClick = { onBack() }) { Text("Regresar") }
         }
     }
 }

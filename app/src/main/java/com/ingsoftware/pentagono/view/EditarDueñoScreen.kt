@@ -85,7 +85,7 @@ fun EditarDueñoScreen(
                     enabled = !hayErrores,
                     colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
                 ) {
-                    Text("Aceptar")
+                    Text("Aceptar", color = colorScheme.onSecondary)
                 }
                 OutlinedButton(onClick = { onBack() }) {
                     Text("Cancelar")

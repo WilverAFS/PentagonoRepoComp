@@ -34,12 +34,10 @@ import androidx.compose.runtime.getValue
 // ✅ extensión para navegación segura
 fun NavController.navigateIfNotCurrent(route: String) {
     val currentRoute = currentBackStackEntry?.destination?.route
-    // ✅ Si la ruta actual es la misma, no navega
     if (currentRoute != route) {
         navigate(route)
     }
 }
-
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("ViewModelConstructorInComposable")
@@ -61,8 +59,8 @@ class MainActivity : ComponentActivity() {
                 val clienteVM = ClienteViewModel(ClienteRepository(db.clienteDao()))
                 val empleadoVM = EmpleadoViewModel(EmpleadoRepository(db.empleadoDao()))
                 val cotizacionVM = CotizacionViewModel(CotizacionRepository(db.cotizacionDao()))
-                val ordenVM = OrdenViewModel(OrdenRepository(db.ordenDao()))
-                val logVM = LogViewModel(LogRepository(db.logDao()))   // ✅ LogViewModel
+                val ordenVM = OrdenViewModel(OrdenRepository(db.ordenDao()))   // ✅ ahora se pasa al NavGraph
+                val logVM = LogViewModel(LogRepository(db.logDao()))
                 val dueñoVM = DueñoViewModel(DueñoRepository(db.dueñoDao()))
 
                 NavHost(navController = navController, startDestination = "login") {
@@ -72,7 +70,6 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             viewModel = dueñoVM,
                             onLoginSuccess = { dueño ->
-                                // ✅ Registrar log de acceso
                                 logVM.registrarLog(
                                     idDueño = dueño.id_dueño,
                                     tipo = com.ingsoftware.pentagono.model.TipoLog.ACCESS,
@@ -121,10 +118,10 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // 📌 Subgrafos CRUD con logVM
+                    // 📌 Subgrafos CRUD con logVM y ordenVM
                     clienteNavGraph(navController, clienteVM, cotizacionVM, logVM)
                     empleadoNavGraph(navController, empleadoVM, logVM)
-                    cotizacionNavGraph(navController, cotizacionVM, clienteVM, logVM)
+                    cotizacionNavGraph(navController, cotizacionVM, clienteVM, logVM, ordenVM) // ✅ ahora recibe ordenVM
                     ordenNavGraph(navController, ordenVM, empleadoVM, logVM)
                     dueñoNavGraph(navController, dueñoVM, logVM)
                     logNavGraph(navController, logVM)

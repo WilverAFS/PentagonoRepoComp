@@ -35,14 +35,24 @@ fun NavGraphBuilder.cotizacionNavGraph(
         val ordenes by ordenVM.ordenes.collectAsState()
 
         // Diagnóstico global
-        cotizaciones.filter { it.estado_cotizacion == "aceptado" }.forEach { c ->
-            val existeOrden = ordenes.any { it.id_cotizacion == c.id_cotizacion }
-            if (!existeOrden) {
+        cotizaciones.forEach { c ->
+            val ordenAsociada = ordenes.find { it.id_cotizacion == c.id_cotizacion }
+
+            if (c.estado_cotizacion == "aceptado" && ordenAsociada == null) {
+                // Caso 1: aceptada sin orden → pendiente
                 cotizacionVM.updateCotizacion(c.copy(estado_cotizacion = "pendiente"))
                 logVM.registrarLog(
                     idDueño = dueñoId,
                     tipo = TipoLog.UPDATE,
                     descripcion = "Cotización ${c.id_cotizacion} restablecida a pendiente por no tener orden asociada"
+                )
+            } else if (c.estado_cotizacion == "pendiente" && ordenAsociada != null) {
+                // Caso 2: pendiente con orden → aceptada
+                cotizacionVM.updateCotizacion(c.copy(estado_cotizacion = "aceptado"))
+                logVM.registrarLog(
+                    idDueño = dueñoId,
+                    tipo = TipoLog.UPDATE,
+                    descripcion = "Cotización ${c.id_cotizacion} marcada como aceptada porque tiene orden asociada"
                 )
             }
         }
@@ -67,13 +77,21 @@ fun NavGraphBuilder.cotizacionNavGraph(
         val cotizacion = cotizaciones.find { it.id_cotizacion == id }
 
         if (cotizacion != null) {
-            val existeOrden = ordenes.any { it.id_cotizacion == cotizacion.id_cotizacion }
-            if (cotizacion.estado_cotizacion == "aceptado" && !existeOrden) {
+            val ordenAsociada = ordenes.find { it.id_cotizacion == cotizacion.id_cotizacion }
+
+            if (cotizacion.estado_cotizacion == "aceptado" && ordenAsociada == null) {
                 cotizacionVM.updateCotizacion(cotizacion.copy(estado_cotizacion = "pendiente"))
                 logVM.registrarLog(
                     idDueño = dueñoId,
                     tipo = TipoLog.UPDATE,
                     descripcion = "Cotización ${cotizacion.id_cotizacion} restablecida a pendiente por no tener orden asociada"
+                )
+            } else if (cotizacion.estado_cotizacion == "pendiente" && ordenAsociada != null) {
+                cotizacionVM.updateCotizacion(cotizacion.copy(estado_cotizacion = "aceptado"))
+                logVM.registrarLog(
+                    idDueño = dueñoId,
+                    tipo = TipoLog.UPDATE,
+                    descripcion = "Cotización ${cotizacion.id_cotizacion} marcada como aceptada porque tiene orden asociada"
                 )
             }
 
@@ -116,7 +134,6 @@ fun NavGraphBuilder.cotizacionNavGraph(
             onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") },
             onCancel = { navController.popBackStack() },
             onSaveSuccess = {
-                // ✅ Registrar log al agregar nueva cotización
                 logVM.registrarLog(
                     idDueño = dueñoId,
                     tipo = TipoLog.ADD,

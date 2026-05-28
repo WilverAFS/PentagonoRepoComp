@@ -1,50 +1,36 @@
 package com.ingsoftware.pentagono.view
 
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun PentagonoBottomBar(
     onSearchClick: () -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-
+    // Kept for API compatibility — screens pass this to Scaffold.bottomBar.
+    // It renders nothing; each screen places its FAB via Scaffold.floatingActionButton.
     BottomAppBar(
-        containerColor = colorScheme.surface,
-        contentColor = colorScheme.primary
+        containerColor = Color.Transparent,
+        contentColor   = Color.Transparent,
+        tonalElevation = 0.dp
+    ) {}
+}
+
+@Composable
+fun PentagonoFab(onClick: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
+    FloatingActionButton(
+        onClick        = onClick,
+        containerColor = colorScheme.primary,
+        contentColor   = Color.White,
+        shape          = CircleShape
     ) {
-
-        Spacer(Modifier.weight(1f)) // empuja los íconos a la derecha
-
-        IconButton(onClick = onSearchClick) {
-            Icon(Icons.Filled.Search, contentDescription = "Buscar Elemento")
-        }
-
-        IconButton(onClick = onAddClick) {
-            Icon(Icons.Filled.Add, contentDescription = "Agregar Elemento")
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PentagonoBottomBarPreviewLight() {
-    MaterialTheme(colorScheme = lightColorScheme()) {
-        PentagonoBottomBar()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PentagonoBottomBarPreviewDark() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
-        PentagonoBottomBar()
+        Icon(Icons.Filled.Add, contentDescription = "Agregar")
     }
 }

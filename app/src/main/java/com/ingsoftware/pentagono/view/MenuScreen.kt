@@ -2,6 +2,13 @@ package com.ingsoftware.pentagono.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -9,7 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ingsoftware.pentagono.ui.theme.VerdeWelcome
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,11 +30,23 @@ fun MenuScreen(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
+    data class MenuItem(val label: String, val icon: ImageVector, val route: String)
+
+    val menuItems = listOf(
+        MenuItem("Cotizaciones",  Icons.Filled.Receipt,  "cotizaciones/$dueñoId"),
+        MenuItem("Órdenes",       Icons.Filled.Work,     "ordenes/$dueñoId"),
+        MenuItem("Clientes",      Icons.Filled.People,   "clientes/$dueñoId"),
+        MenuItem("Empleados",     Icons.Filled.Person,   "empleados/$dueñoId"),
+        MenuItem("Configuración", Icons.Filled.Settings, "configuracion/$dueñoId"),
+        MenuItem("Logs",          Icons.Filled.List,     "logs/$dueñoId")
+    )
+
     Scaffold(
         topBar = {
             PentagonoTopBar(
-                title = "Menú de Opciones",
-                onMenuClick = { /* ✅ No hace nada en MenuScreen */ }
+                title          = "Menú Principal",
+                showBackButton = true,
+                onBackClick    = { onNavigate("start/$dueñoId") }
             )
         }
     ) { innerPadding ->
@@ -32,94 +55,161 @@ fun MenuScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(colorScheme.background)
-                .padding(32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.End
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
-
-            MenuButton("Cotizaciones", Icons.Filled.Receipt, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("cotizaciones/$dueñoId")
-            }
-            MenuButton("Órdenes de trabajo", Icons.Filled.Work, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("ordenes/$dueñoId")
-            }
-            MenuButton("Clientes", Icons.Filled.People, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("clientes/$dueñoId")
-            }
-            MenuButton("Empleados", Icons.Filled.Person, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("empleados/$dueñoId")
-            }
-            MenuButton("Configuración", Icons.Filled.Settings, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("configuracion/$dueñoId")
-            }
-            MenuButton("Logs", Icons.Filled.List, colorScheme.secondary, colorScheme.onPrimary) {
-                onNavigate("logs/$dueñoId")
-            }
-
-
-            Spacer(Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            LazyVerticalGrid(
+                columns             = GridCells.Fixed(2),
+                modifier            = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 600.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement   = Arrangement.spacedBy(12.dp),
+                userScrollEnabled     = false
             ) {
-                Button(
-                    onClick = { onNavigate("salir") },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Salir", color = colorScheme.onBackground)
-                        Spacer(Modifier.width(8.dp))
-                        Icon(Icons.Filled.ExitToApp, contentDescription = "Salir", tint = colorScheme.onBackground)
-                    }
+                items(menuItems) { item ->
+                    MenuGridCard(
+                        label   = item.label,
+                        icon    = item.icon,
+                        onClick = { onNavigate(item.route) }
+                    )
                 }
+            }
 
-                Button(
-                    onClick = { onNavigate("start/$dueñoId") },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Inicio", color = colorScheme.background)
+            Spacer(Modifier.height(20.dp))
+
+            // Tarjeta de información del negocio
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape    = RoundedCornerShape(16.dp),
+                colors   = CardDefaults.cardColors(
+                    containerColor = VerdeWelcome
+                )
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text  = "Pentagono Vidriería",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text  = "Sistema de gestión profesional para vidriería",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.85f)
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color(0xFF8BC34A), CircleShape)
+                        )
                         Spacer(Modifier.width(8.dp))
-                        Icon(Icons.Filled.Home, contentDescription = "Inicio", tint = colorScheme.background)
+                        Text(
+                            text  = "Villa de Zaachila, Oaxaca, México",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.85f)
+                        )
                     }
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-fun MenuButton(
-    text: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    backgroundColor: Color,
-    textColor: Color,
+fun MenuGridCard(
+    label: String,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor)
+    val colorScheme = MaterialTheme.colorScheme
+
+    Card(
+        onClick   = onClick,
+        modifier  = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f),
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint     = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(36.dp)
+            )
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text      = label,
+                style     = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                color     = colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Surface(
+        onClick   = onClick,
+        modifier  = Modifier.fillMaxWidth(),
+        shape     = RoundedCornerShape(12.dp),
+        color     = colorScheme.surface,
+        tonalElevation  = 1.dp,
+        shadowElevation = 1.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
+            modifier  = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment   = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text, color = textColor)
-            Spacer(Modifier.width(8.dp))
-            Icon(icon, contentDescription = text, tint = textColor)
+            Row(
+                verticalAlignment   = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = colorScheme.secondary,
+                    modifier = Modifier.size(38.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint     = colorScheme.onSecondary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Text(
+                    text  = text,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorScheme.onSurface
+                )
+            }
+            Icon(
+                imageVector = Icons.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint     = colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

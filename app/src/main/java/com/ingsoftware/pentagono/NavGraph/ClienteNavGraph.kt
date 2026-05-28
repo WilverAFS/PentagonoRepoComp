@@ -74,25 +74,27 @@ fun NavGraphBuilder.clienteNavGraph(
         )
     }
 
-    // 📌 Nuevo cliente con teléfono prellenado
+    // 📌 Nuevo cliente con teléfono prellenado (desde cotización legacy)
     composable("nuevoCliente/{telefono}/{dueñoId}") { backStackEntry ->
         val telefono = backStackEntry.arguments?.getString("telefono") ?: ""
-        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
+        val dueñoId  = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevoClienteScreen(
-            viewModel = clienteVM,
+            viewModel         = clienteVM,
             prefilledTelefono = telefono,
-            onBack = { navController.popBackStack() },
-            onSaveSuccess = {
-                // ✅ Registrar log de tipo ADD usando .value
+            onBack            = { navController.popBackStack() },
+            onSaveSuccess     = {
                 val nuevo = clienteVM.clientes.value.lastOrNull()
                 if (nuevo != null) {
                     logVM.registrarLog(
-                        idDueño = dueñoId,
-                        tipo = TipoLog.ADD,
+                        idDueño     = dueñoId,
+                        tipo        = TipoLog.ADD,
                         descripcion = "Cliente agregado: ${nuevo.nombre} (Tel: ${nuevo.telefono})"
                     )
                 }
-                navController.navigate("nuevaCotizacion?telefono=$telefono/$dueñoId") {
+                navController.popBackStack()
+            },
+            onGoToCotizacion  = {
+                navController.navigate("cotizaciones/$dueñoId") {
                     popUpTo("nuevoCliente/$telefono/$dueñoId") { inclusive = true }
                 }
             },

@@ -31,6 +31,7 @@ fun NavGraphBuilder.ordenNavGraph(
         val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         OrdenesScreen(
             viewModel = ordenVM,
+            onBack = { navController.popBackStack() },
             onSearchOrden = { navController.navigate("buscarOrden/$dueñoId") },
             onOpenOrden = { orden ->
                 navController.navigate("detalleOrden/${orden.id_orden}/$dueñoId")

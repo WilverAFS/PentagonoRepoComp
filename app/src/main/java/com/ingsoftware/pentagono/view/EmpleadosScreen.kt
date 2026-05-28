@@ -4,17 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ingsoftware.pentagono.data.EmpleadoEntity
+import com.ingsoftware.pentagono.ui.theme.VerdeWelcome
 import com.ingsoftware.pentagono.viewmodel.EmpleadoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,104 +31,189 @@ fun EmpleadosScreen(
     onEditEmpleado: (EmpleadoEntity) -> Unit = {},
     onMenuClick: () -> Unit = {}
 ) {
-    val empleados by viewModel.empleados.collectAsState()
+    val empleados   by viewModel.empleados.collectAsState()
     val colorScheme = MaterialTheme.colorScheme
+
+    var query by remember { mutableStateOf("") }
+
+    val empleadosFiltrados = remember(empleados, query) {
+        val q = query.trim()
+        if (q.isBlank()) empleados
+        else empleados.filter { e ->
+            e.nombre.contains(q, ignoreCase = true) ||
+            e.apellidoPaterno.contains(q, ignoreCase = true) ||
+            e.apellidoMaterno.contains(q, ignoreCase = true) ||
+            e.telefono.contains(q) ||
+            e.curp.contains(q, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         topBar = {
             PentagonoTopBar(
-                title = "Empleados",
-                onMenuClick = { onMenuClick() }
+                title          = "Empleados",
+                showBackButton = true,
+                onBackClick    = onBack
             )
         },
-        bottomBar = {
-            PentagonoBottomBar(
-                onSearchClick = { onSearchEmpleado() },
-                onAddClick = { onAddEmpleado() }
-            )
+        floatingActionButton = {
+            PentagonoFab(onClick = onAddEmpleado)
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .background(colorScheme.background)
-                .padding(16.dp)
+                .background(colorScheme.background),
+            contentPadding      = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            /*
-            Text(
-                "Listado de Empleados",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.primary
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-             */
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(empleados) { empleado ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+            // Tarjeta de estadísticas
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape    = RoundedCornerShape(16.dp),
+                    colors   = CardDefaults.cardColors(containerColor = VerdeWelcome)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                // ✅ Mostrar id_empleado interno
-                                Text(
-                                    "ID: ${empleado.id_empleado}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-
-                                Text(
-                                    "CURP: ${empleado.curp}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                val nombreCompleto = listOfNotNull(
-                                    empleado.nombre.takeIf { it.isNotBlank() },
-                                    empleado.apellidoPaterno.takeIf { it.isNotBlank() },
-                                    empleado.apellidoMaterno.takeIf { it.isNotBlank() }
-                                ).joinToString(" ")
-
-                                Text(
-                                    nombreCompleto,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-
-                                Text(
-                                    "Tel: ${empleado.telefono}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                Text(
-                                    "Correo: ${empleado.correo ?: "-"}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-
-                                Text(
-                                    "Dirección: ${empleado.calle} #${empleado.numeroExterior}${empleado.numeroInterior?.let { " Int. $it" } ?: ""}, ${empleado.colonia}, ${empleado.municipio}, ${empleado.estado}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    maxLines = 3,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            IconButton(onClick = { onEditEmpleado(empleado) }) {
-                                Icon(Icons.Filled.Edit, contentDescription = "Editar Empleado")
-                            }
+                        Column {
+                            Text("Total Empleados", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.8f))
+                            Text("${empleados.size}", style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text("Activos", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.8f))
+                            Text("${empleados.size}", style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold), color = Color.White)
                         }
                     }
                 }
+                Spacer(Modifier.height(4.dp))
+            }
+
+            // Barra de búsqueda
+            item {
+                OutlinedTextField(
+                    value         = query,
+                    onValueChange = { query = it },
+                    placeholder   = { Text("Buscar por nombre, CURP o teléfono...") },
+                    leadingIcon   = { Icon(Icons.Default.Search, contentDescription = null, tint = colorScheme.onSurfaceVariant) },
+                    trailingIcon  = if (query.isNotBlank()) ({
+                        IconButton(onClick = { query = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Limpiar")
+                        }
+                    }) else null,
+                    singleLine    = true,
+                    shape         = RoundedCornerShape(14.dp),
+                    colors        = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor   = colorScheme.primary,
+                        unfocusedBorderColor = colorScheme.outline
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(4.dp))
+            }
+
+            if (empleadosFiltrados.isEmpty()) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(top = 24.dp), contentAlignment = Alignment.Center) {
+                        Text("No se encontraron empleados.", color = colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                items(empleadosFiltrados) { empleado ->
+                    EmpleadoCard(empleado = empleado, onEdit = { onEditEmpleado(empleado) })
+                }
+            }
+
+            item { Spacer(Modifier.height(80.dp)) }
+        }
+    }
+}
+
+@Composable
+private fun EmpleadoCard(
+    empleado: EmpleadoEntity,
+    onEdit: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    val nombreCompleto = listOfNotNull(
+        empleado.nombre.takeIf { it.isNotBlank() },
+        empleado.apellidoPaterno.takeIf { it.isNotBlank() },
+        empleado.apellidoMaterno.takeIf { it.isNotBlank() }
+    ).joinToString(" ")
+
+    val iniciales = buildString {
+        empleado.nombre.firstOrNull()?.let { append(it.uppercaseChar()) }
+        empleado.apellidoPaterno.firstOrNull()?.let { append(it.uppercaseChar()) }
+    }.take(2)
+
+    Card(
+        modifier  = Modifier.fillMaxWidth(),
+        shape     = RoundedCornerShape(16.dp),
+        colors    = CardDefaults.cardColors(containerColor = colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(iniciales, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White)
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text     = nombreCompleto,
+                    style    = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color    = colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Badge, null, modifier = Modifier.size(13.dp), tint = colorScheme.primary)
+                    Spacer(Modifier.width(4.dp))
+                    Text(empleado.curp, style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Phone, null, modifier = Modifier.size(13.dp), tint = colorScheme.primary)
+                    Spacer(Modifier.width(4.dp))
+                    Text(empleado.telefono, style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant)
+                }
+                if (!empleado.correo.isNullOrBlank()) {
+                    Spacer(Modifier.height(2.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Email, null, modifier = Modifier.size(13.dp), tint = colorScheme.primary)
+                        Spacer(Modifier.width(4.dp))
+                        Text(empleado.correo, style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                Spacer(Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(13.dp), tint = colorScheme.primary)
+                    Spacer(Modifier.width(4.dp))
+                    Text("${empleado.colonia}, ${empleado.municipio}", style = MaterialTheme.typography.bodySmall, color = colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+
+            IconButton(onClick = onEdit) {
+                Icon(Icons.Default.Edit, contentDescription = "Editar", tint = colorScheme.onSurfaceVariant)
             }
         }
     }

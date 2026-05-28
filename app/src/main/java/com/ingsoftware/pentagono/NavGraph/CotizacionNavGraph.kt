@@ -15,10 +15,11 @@ import com.ingsoftware.pentagono.viewmodel.ClienteViewModel
 import com.ingsoftware.pentagono.viewmodel.CotizacionViewModel
 import com.ingsoftware.pentagono.viewmodel.LogViewModel
 import com.ingsoftware.pentagono.viewmodel.OrdenViewModel
-import com.ingsoftware.pentagono.view.CotizacionScreen
-import com.ingsoftware.pentagono.view.NuevaCotizacionScreen
 import com.ingsoftware.pentagono.view.BuscarCotizacionScreen
+import com.ingsoftware.pentagono.view.CotizacionScreen
 import com.ingsoftware.pentagono.view.DetalleCotizacionScreen
+import com.ingsoftware.pentagono.view.NuevaCotizacionScreen
+import com.ingsoftware.pentagono.view.NuevoClienteScreen
 import com.ingsoftware.pentagono.model.TipoLog
 
 fun NavGraphBuilder.cotizacionNavGraph(
@@ -59,6 +60,7 @@ fun NavGraphBuilder.cotizacionNavGraph(
 
         CotizacionScreen(
             viewModel = cotizacionVM,
+            onBack = { navController.popBackStack() },
             onAddCotizacion = { navController.navigate("nuevaCotizacion/$dueñoId") },
             onSearchCotizacion = { navController.navigate("buscarCotizacion/$dueñoId") },
             onOpenCotizacion = { cotizacion ->
@@ -129,18 +131,35 @@ fun NavGraphBuilder.cotizacionNavGraph(
     composable("nuevaCotizacion/{dueñoId}") { backStackEntry ->
         val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
         NuevaCotizacionScreen(
-            viewModel = cotizacionVM,
+            viewModel        = cotizacionVM,
             clienteViewModel = clienteVM,
-            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") },
-            onCancel = { navController.popBackStack() },
-            onSaveSuccess = {
+            onMenuClick      = { navController.navigateIfNotCurrent("menu/$dueñoId") },
+            onCancel         = { navController.popBackStack() },
+            onAddCliente     = { navController.navigate("nuevoClienteDesdeCot/$dueñoId") },
+            onSaveSuccess    = {
                 logVM.registrarLog(
-                    idDueño = dueñoId,
-                    tipo = TipoLog.ADD,
+                    idDueño     = dueñoId,
+                    tipo        = TipoLog.ADD,
                     descripcion = "Se agregó una nueva cotización"
                 )
                 navController.popBackStack()
             }
+        )
+    }
+
+    // 📌 Registrar cliente desde flujo de cotización
+    composable("nuevoClienteDesdeCot/{dueñoId}") { backStackEntry ->
+        val dueñoId = backStackEntry.arguments?.getString("dueñoId")?.toIntOrNull() ?: 0
+        NuevoClienteScreen(
+            viewModel        = clienteVM,
+            onBack           = { navController.popBackStack() },
+            onSaveSuccess    = { navController.popBackStack() },
+            onGoToCotizacion = {
+                navController.navigate("nuevaCotizacion/$dueñoId") {
+                    popUpTo("nuevoClienteDesdeCot/$dueñoId") { inclusive = true }
+                }
+            },
+            onMenuClick = { navController.navigateIfNotCurrent("menu/$dueñoId") }
         )
     }
 

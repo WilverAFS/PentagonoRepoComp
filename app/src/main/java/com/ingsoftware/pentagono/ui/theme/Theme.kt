@@ -16,61 +16,131 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Tipografía base (Roboto)
 val AppTypography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 32.sp
+        fontSize = 32.sp,
+        letterSpacing = (-0.5).sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        letterSpacing = (-0.3).sp
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp
+        fontSize = 22.sp,
+        letterSpacing = (-0.2).sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+        fontSize = 16.sp,
+        lineHeight = 24.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
+        fontSize = 14.sp,
+        letterSpacing = 0.1.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        letterSpacing = 0.5.sp
     )
 )
 
-// Colores principales
-val VerdePrincipal = Color(0xFF3FE048)
-val GrisPrincipal = Color(0xFF5E5E5E)
-val NaranjaPrincipal = Color(0xFF304FFE)
+// ── Paleta Verde Pentagono ────────────────────────────────────────────────────
+val VerdeVivo           = Color(0xFF3E7C2A)
+val VerdeHover          = Color(0xFF6CB05A)
+val VerdeOscuro         = Color(0xFF1F5C18)
+val VerdeFondo          = Color(0xFFEEF7E8)
+val VerdeGradStart      = Color(0xFF7DC460)
+val VerdeGradEnd        = Color(0xFF1F5C18)
+val VerdeWelcome        = Color(0xFF2A5E1A)
 
-// Colores secundarios
-val Negro = Color(0xFF000000)
-val Blanco = Color(0xFFFFFFFF)
+val TealPrincipal       = Color(0xFF1D9E75)
+val TealClaro           = Color(0xFF5DCAA5)
+val TealFondo           = Color(0xFFE1F5EE)
 
-// Paleta para modo oscuro
+val GrisOscuro          = Color(0xFF2C2C2A)
+val GrisMedio           = Color(0xFF5F5E5A)
+val GrisClaro           = Color(0xFFD3D1C7)
+val GrisFondo           = Color(0xFFF2F7EE)
+
+val Rojo                = Color(0xFFB03030)
+val RojoClaro           = Color(0xFFFCEBEB)
+
+val Negro               = Color(0xFF000000)
+val Blanco              = Color(0xFFFFFFFF)
+
 private val DarkColorScheme = darkColorScheme(
-    primary = VerdePrincipal,
-    secondary = NaranjaPrincipal,
-    background = Negro,
-    surface = GrisPrincipal,
-    onPrimary = Blanco,
-    onSecondary = Negro,
-    onBackground = Blanco,
-    onSurface = Blanco
+    primary              = VerdeHover,
+    onPrimary            = Color(0xFF173404),
+    primaryContainer     = VerdeOscuro,
+    onPrimaryContainer   = VerdeFondo,
+    secondary            = TealClaro,
+    onSecondary          = Color(0xFF04342C),
+    secondaryContainer   = Color(0xFF085041),
+    onSecondaryContainer = TealFondo,
+    background           = Color(0xFF0F1A08),
+    onBackground         = Color(0xFFE0EDD0),
+    surface              = Color(0xFF1A2A10),
+    onSurface            = Color(0xFFD0E8BA),
+    surfaceVariant       = Color(0xFF253A18),
+    onSurfaceVariant     = Color(0xFFAAC98E),
+    error                = Color(0xFFF09595),
+    onError              = Color(0xFF501313),
+    outline              = Color(0xFF4A6A28),
+    outlineVariant       = Color(0xFF2E4218)
 )
 
-// Paleta para modo claro
 private val LightColorScheme = lightColorScheme(
-    primary = VerdePrincipal,
-    secondary = NaranjaPrincipal,
-    background = Blanco,
-    surface = GrisPrincipal,
-    onPrimary = Blanco,
-    onSecondary = Negro,
-    onBackground = Negro,
-    onSurface = Negro
+    primary              = VerdeVivo,
+    onPrimary            = Blanco,
+    primaryContainer     = VerdeOscuro,
+    onPrimaryContainer   = VerdeFondo,
+    secondary            = TealPrincipal,
+    onSecondary          = Blanco,
+    secondaryContainer   = TealFondo,
+    onSecondaryContainer = Color(0xFF04342C),
+    background           = GrisFondo,
+    onBackground         = GrisOscuro,
+    surface              = Blanco,
+    onSurface            = GrisOscuro,
+    surfaceVariant       = VerdeFondo,
+    onSurfaceVariant     = GrisMedio,
+    error                = Rojo,
+    onError              = Blanco,
+    errorContainer       = RojoClaro,
+    outline              = GrisClaro,
+    outlineVariant       = Color(0xFFE0EDD8)
 )
 
 @Composable
@@ -87,11 +157,9 @@ fun PentagonoTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
         content = content
     )
-
 }

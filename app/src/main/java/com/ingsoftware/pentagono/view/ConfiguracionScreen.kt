@@ -31,12 +31,17 @@ fun ConfiguracionScreen(
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { PentagonoTopBar(title = "Configuración", onMenuClick = { onMenuClick() }) },
-        bottomBar = {
-            PentagonoBottomBar(
-                onSearchClick = { onSearchDueño() },
-                onAddClick = { onAddDueño() }
+        topBar = {
+            PentagonoTopBar(
+                title            = "Configuración",
+                showBackButton   = true,
+                onBackClick      = onBack,
+                showSearchAction = true,
+                onSearchClick    = onSearchDueño
             )
+        },
+        floatingActionButton = {
+            PentagonoFab(onClick = onAddDueño)
         }
     ) { innerPadding ->
         Column(
